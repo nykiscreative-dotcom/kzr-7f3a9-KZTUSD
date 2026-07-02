@@ -1,0 +1,36 @@
+name: USD/KZT Daily Radar
+on:
+  schedule:
+    - cron: "30 5 * * *"   # 05:30 UTC = 10:30 Астана
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - name: Daily pipeline (данные + сигнал + Telegram)
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DATA_DIR: ./data
+          TZ: Asia/Almaty
+        run: python main.py
+      - name: Build mobile dashboard (GitHub Pages)
+        env: { DATA_DIR: ./data, TZ: Asia/Almaty }
+        run: |
+          python brief_gen.py
+          python site_build.py
+      - name: Commit data, journal & site
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/ docs/
+          git diff --cached --quiet || git commit -m "daily $(date +%F)"
+          git push
