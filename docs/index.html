@@ -1,0 +1,413 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>USD/KZT · Ваш AI-консультант</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--gold:#b25e00}
+body{min-height:100vh;color:var(--tx);font-family:var(--ff);transition:background .5s,color .5s;overflow-x:hidden;padding:0 0 60px;background:var(--bg)}
+/* ===== THEME: APPLE ===== */
+body.apple{--ff:-apple-system,'SF Pro Display',Inter,sans-serif;--fd:-apple-system,'SF Pro Display',Inter,sans-serif;
+--bg:#fbfbfd;--tx:#1d1d1f;--mut:#6e6e73;--acc:#0071e3;--acc2:#0071e3;
+--glass:rgba(255,255,255,.66);--bd:rgba(0,0,0,.07);--bd-h:rgba(0,113,227,.4);--kvbd:rgba(0,0,0,.08);
+--card-sh:0 18px 44px rgba(0,0,0,.07);--rad:24px;--inner:#fff;
+--up:#1d7a3a;--dn:#c2273a;--vhold:#b25e00;--tipbg:#fff;--tiptx:#3a3a3c;--chatbg:rgba(255,255,255,.95)}
+body.apple .stars{display:none}
+body.apple h1 b{font-weight:800}
+body.apple .grad{background:linear-gradient(90deg,#0071e3,#9d4edd);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+body.apple .cell:after{display:none}
+body.apple .cells{gap:14px;border:none;background:none}
+body.apple .cell{border:1px solid var(--bd);border-radius:var(--rad);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
+body.apple .tmin .t{color:#b25e00}
+body.apple .fab{background:var(--acc);box-shadow:0 10px 28px rgba(0,113,227,.4)}
+/* ===== THEME: SPACEX ===== */
+body.spacex{--ff:'Space Grotesk',monospace;--fd:'Space Grotesk',monospace;
+--bg:#000;--tx:#eaeaea;--mut:#8a8a8a;--acc:#fff;--acc2:#ff3b30;
+--glass:#050505;--bd:#222;--bd-h:#666;--kvbd:#1c1c1c;
+--card-sh:none;--rad:2px;--inner:#0a0a0a;
+--up:#30ff9e;--dn:#ff3b30;--vhold:#eaeaea;--tipbg:#101010;--tiptx:#ccc;--chatbg:rgba(5,5,5,.96)}
+body.spacex .blob{display:none}
+body.spacex h1,body.spacex .verdict,body.spacex .v,body.spacex .tab,body.spacex .k,body.spacex .lbl{text-transform:uppercase}
+body.spacex h1{font-weight:300;letter-spacing:.06em}
+body.spacex h1 b{font-weight:700}
+body.spacex .g,body.spacex .pstep{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.spacex .g:hover{transform:none;border-color:#444}
+body.spacex .lbl,body.spacex .k{letter-spacing:.3em}
+body.spacex .tabs{gap:1px;background:var(--bd);border:1px solid var(--bd)}
+body.spacex .tab{border:none;border-radius:0;background:#050505;letter-spacing:.14em;font-weight:500}
+body.spacex .tab.on{background:#111;color:#fff;box-shadow:inset 0 -2px 0 var(--acc2)}
+body.spacex .tab .tn{color:var(--acc2)}
+body.spacex .fab{background:#000;border:1px solid #444;box-shadow:none;animation:none}
+body.spacex .ring{background:conic-gradient(var(--acc2) 0 calc(var(--p)*1%),#1a1a1a 0 100%)}
+body.spacex .hz-bar div{background:#fff}
+body.spacex .f-up{background:#fff}body.spacex .f-dn{background:var(--acc2)}
+body.spacex .pshare{color:#fff}
+body.spacex .pane h2{letter-spacing:.25em}
+body.spacex .probbar{border:1px solid #222}
+body.spacex .pb-up{background:rgba(48,255,158,.18);color:#30ff9e}
+body.spacex .pb-dn{background:rgba(255,59,48,.15);color:#ff3b30}
+body.spacex #cometlegend{display:block!important}
+/* ===== BACKGROUNDS ===== */
+.blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:.5;z-index:0;pointer-events:none;animation:drift 18s ease-in-out infinite alternate}
+.b1{width:520px;height:520px;background:#c7d7ff;top:-160px;right:-120px}
+.b2{width:420px;height:420px;background:#ffd9c7;bottom:-140px;left:-100px;animation-delay:-9s}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(-60px,40px) scale(1.15)}}
+.stars{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+/* ===== LAYOUT ===== */
+main{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:30px clamp(14px,3vw,32px)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--bd);padding-bottom:14px}
+.lbl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+.switch{display:flex;gap:2px;border:1px solid var(--bd);border-radius:30px;padding:4px;cursor:pointer;user-select:none;background:var(--glass)}
+.switch span{font-size:11px;padding:6px 13px;border-radius:20px;color:var(--mut);transition:.3s;letter-spacing:.06em}
+.switch span.on{background:var(--tx);color:var(--bg)}
+h1{font-family:var(--fd);font-size:clamp(26px,4.4vw,50px);line-height:1.12;margin:34px 0 12px;letter-spacing:-.01em;animation:up .8s .05s both}
+.h1a{display:none}body.apple .h1a{display:block}body.spacex .h1s{display:block}
+.h1s{display:none}
+.lede{color:var(--mut);font-size:15px;max-width:660px;line-height:1.6;animation:up .8s .15s both}
+details.brief{margin-top:10px;max-width:780px;animation:up .8s .22s both}
+details.brief summary{cursor:pointer;font-size:13px;color:var(--acc);list-style:none;padding:4px 0}
+details.brief summary::-webkit-details-marker{display:none}
+details.brief .full{font-size:14px;line-height:1.75;padding:12px 16px;border-left:2px solid var(--acc);margin-top:8px;color:var(--tx);opacity:.9}
+/* telemetry cells (верх SpaceX из превью) */
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--bd);border:1px solid var(--bd);margin-top:34px;animation:up .9s .3s both}
+.cell{background:var(--glass);padding:22px 22px;position:relative;box-shadow:var(--card-sh)}
+.cell:hover,.g:hover{z-index:30}
+.cell:after{content:"";position:absolute;left:0;top:0;height:2px;width:0;background:#fff;animation:scan 2.4s 1s forwards}
+@keyframes scan{to{width:100%}}
+.cell:after{max-width:100%}
+.k{font-size:10px;letter-spacing:.22em;color:var(--mut);text-transform:uppercase}
+.v{font-family:var(--fd);font-size:clamp(26px,3vw,38px);font-weight:700;margin-top:10px;letter-spacing:.01em}
+.v .unit{font-size:13px;color:var(--mut);font-weight:400}
+.v.buy{color:var(--up)}.v.sell{color:var(--dn)}.v.hold{color:var(--vhold)}
+.mini{font-size:12px;color:var(--mut);margin-top:6px;line-height:1.5}
+.tmin{margin:26px 0 6px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;animation:up 1s .45s both}
+.tmin .t{font-size:12px;letter-spacing:.3em;color:var(--acc2);text-transform:uppercase}
+.tmin .c{font-family:var(--fd);font-size:clamp(16px,2.2vw,24px);font-weight:700;letter-spacing:.05em}
+/* cards */
+.g{background:var(--glass);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);
+border:1px solid var(--bd);border-radius:var(--rad);box-shadow:var(--card-sh);transition:transform .4s cubic-bezier(.2,.8,.2,1),border-color .4s}
+.g:hover{transform:translateY(-3px);border-color:var(--bd-h)}
+.card{padding:20px 22px}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}
+.strat .strat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.strat-title{font-weight:700;font-size:13px}
+.chip{font-size:10px;letter-spacing:.14em;color:var(--mut);border:1px solid var(--bd);padding:4px 11px;border-radius:var(--rad);text-transform:uppercase}
+.verdict{font-family:var(--fd);font-size:clamp(20px,2.3vw,26px);font-weight:700}
+.strat.buy .verdict{color:var(--up)}.strat.sell .verdict{color:var(--dn)}.strat.hold .verdict{color:var(--vhold)}
+.action{color:var(--mut);margin:5px 0 12px;font-size:13px}
+.probbar{display:flex;height:24px;border-radius:var(--rad);overflow:hidden;font-size:11px;font-weight:700;margin-bottom:10px}
+.pb-up{background:rgba(29,122,58,.14);color:var(--up);display:flex;align-items:center;padding-left:9px;white-space:nowrap}
+.pb-dn{background:rgba(194,39,58,.12);color:var(--dn);display:flex;align-items:center;justify-content:flex-end;padding-right:9px}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:7px 0;font-size:12.5px;border-bottom:1px dashed var(--kvbd)}
+.kv span{color:var(--mut)}.kv b{text-align:right}
+.comment{margin-top:10px;font-size:12.5px;line-height:1.6;border-left:2px solid var(--acc);padding:8px 12px;color:var(--tx);opacity:.85}
+/* gauge row */
+.gaugerow{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.ring{--p:62;width:80px;height:80px;min-width:80px;border-radius:50%;background:conic-gradient(var(--acc) 0 calc(var(--p)*1%),var(--kvbd) 0 100%);display:grid;place-items:center;animation:spin 1.4s cubic-bezier(.2,.8,.2,1) both}
+.ring i{width:58px;height:58px;border-radius:50%;background:var(--inner);display:grid;place-items:center;font-style:normal;font-family:var(--fd);font-weight:700;font-size:15px}
+@keyframes spin{from{transform:rotate(-70deg);opacity:.4}to{transform:none}}
+.bignum{font-family:var(--fd);font-size:24px;font-weight:700;margin:4px 0}
+.pos{color:var(--up)}.neg{color:var(--dn)}
+/* tabs = пункт управления */
+.tabs{display:flex;flex-wrap:wrap;margin:34px 0 16px;gap:8px}
+.tab{font-family:var(--ff);font-size:11.5px;font-weight:600;color:var(--mut);background:var(--glass);border:1px solid var(--bd);border-radius:30px;padding:10px 16px;cursor:pointer;transition:.3s}
+.tab .tn{font-size:10px;color:var(--acc);margin-right:7px;letter-spacing:.1em}
+.tab.on{color:var(--tx);border-color:var(--bd-h)}
+.pane{display:none;animation:fade .45s ease}
+.pane.on{display:block}
+.pane h2{font-family:var(--fd);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);margin:4px 0 12px}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+/* plan */
+.plan{display:grid;gap:10px}
+.pstep{display:flex;gap:16px;align-items:center;background:var(--glass);border:1px solid var(--bd);border-radius:var(--rad);padding:13px 16px;box-shadow:var(--card-sh)}
+.pshare{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--acc);min-width:64px;text-align:center}
+.pstop .pshare{color:var(--dn)}
+.pwhen{font-weight:600;font-size:13px}.pnote{color:var(--mut);font-size:11.5px;margin-top:2px}
+/* factors */
+.factor{display:grid;grid-template-columns:190px 1fr 56px;gap:4px 14px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--kvbd)}
+.f-name{font-weight:600;font-size:12.5px}
+.f-bar{height:8px;background:var(--kvbd);border-radius:var(--rad);overflow:hidden}
+.f-bar div{height:100%;border-radius:var(--rad);transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.f-up{background:var(--up)}.f-dn{background:var(--dn)}
+.f-up-t{color:var(--up);font-weight:700}.f-dn-t{color:var(--dn);font-weight:700}
+.f-val{text-align:right;font-size:12.5px}
+.f-human{grid-column:1/-1;color:var(--mut);font-size:11.5px;margin-top:-3px}
+.total{margin-top:14px;padding:12px 16px;border-radius:var(--rad);border:1px solid var(--bd-h);font-size:13px}
+ul.nice{margin:6px 0 0;padding:0;list-style:none}
+ul.nice li{padding:8px 0 8px 22px;position:relative;font-size:12.5px;line-height:1.5;border-bottom:1px dashed var(--kvbd)}
+ul.nice li:before{content:"→";position:absolute;left:0;color:var(--acc)}
+.hz{display:grid;grid-template-columns:80px 1fr 50px;gap:3px 14px;align-items:center;padding:8px 0}
+.hz-label{font-weight:600;font-size:12.5px}
+.hz-bar{height:10px;background:var(--kvbd);border-radius:var(--rad);overflow:hidden}
+.hz-bar div{height:100%;background:var(--acc);border-radius:var(--rad);transition:width 1.1s ease}
+.hz-val{font-weight:700;text-align:right;font-size:13px}
+.hz-com{grid-column:2/4;color:var(--mut);font-size:11.5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.scen-if{font-weight:700;font-size:13px;margin-bottom:6px}
+.scen-then{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:6px}
+.muted{color:var(--mut);font-size:12px;line-height:1.55}
+.card h3{margin:0 0 6px;font-size:13px;font-weight:700}
+.card .sub{color:var(--mut);font-size:11.5px;margin-bottom:10px}
+canvas{max-height:200px}
+.jcard .j-date{font-family:var(--fd);color:var(--acc);font-size:12px;font-weight:700;margin-bottom:10px}
+.j-row{display:grid;grid-template-columns:140px 1fr;gap:10px;padding:7px 0;border-bottom:1px dashed var(--kvbd);font-size:12.5px}
+.j-row span{color:var(--mut)}.j-row p{margin:0;line-height:1.5}
+/* tooltips */
+.info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:5px;border-radius:50%;background:var(--kvbd);color:var(--acc);font-size:9px;cursor:help;position:relative;vertical-align:1px}
+.info .tip{visibility:hidden;opacity:0;position:absolute;bottom:130%;left:50%;transform:translateX(-50%) translateY(4px);width:min(280px,74vw);background:var(--tipbg);color:var(--tiptx);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font-size:11.5px;line-height:1.5;font-weight:400;box-shadow:0 12px 40px rgba(0,0,0,.25);z-index:50;transition:.25s;pointer-events:none;text-transform:none;letter-spacing:0}
+.info:hover .tip,.info:focus .tip{visibility:visible;opacity:1;transform:translateX(-50%) translateY(0)}
+/* chat */
+.fab{position:fixed;right:20px;bottom:20px;z-index:100;width:54px;height:54px;border-radius:50%;border:none;background:var(--acc);color:#fff;font-size:21px;cursor:pointer;box-shadow:0 12px 32px rgba(0,0,0,.3);transition:.3s;animation:pulse 3s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.fab:hover{transform:scale(1.1)}
+#chatpop{position:fixed;right:20px;bottom:84px;z-index:101;width:min(320px,88vw);background:var(--chatbg);backdrop-filter:blur(20px);border:1px solid var(--bd);border-radius:16px;padding:16px;display:none;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+#chatpop.open{display:block;animation:fade .35s ease}
+#chatpop .t{font-size:13px;font-weight:700;margin-bottom:10px}
+#chatpop input{width:100%;background:transparent;border:1px solid var(--bd);border-radius:10px;padding:11px 12px;color:var(--tx);font-family:var(--ff);font-size:13px;outline:none}
+#chatpop .go{margin-top:10px;width:100%;border:none;border-radius:10px;padding:11px;background:var(--acc);color:#fff;font-weight:700;cursor:pointer;font-family:var(--ff)}
+#chatpop .m{font-size:10.5px;color:var(--mut);margin-top:8px;line-height:1.5}
+.disclaimer{margin-top:36px;color:var(--mut);opacity:.75;font-size:10.5px;line-height:1.6;max-width:880px}
+@media(max-width:760px){.factor{grid-template-columns:1fr 50px}.f-bar{grid-column:1/-1}.j-row{grid-template-columns:1fr}h1{margin-top:22px}}
+</style><meta name="robots" content="noindex,nofollow"></head><body class="spacex">
+<div class="blob b1"></div><div class="blob b2"></div>
+<canvas class="stars" id="stars"></canvas>
+<main>
+<div class="top">
+  <span class="lbl">USD/KZT · Advisory System</span>
+  <span class="lbl">2 июля 2026 · T−25 до налогового дедлайна</span>
+  <div class="switch" id="sw"><span data-t="apple">Apple</span><span data-t="spacex" class="on">SpaceX</span></div>
+</div>
+<h1 class="h1s">Босс, <b>миссия: ПОКУПКА</b><br>фаза: ИСПОЛНЕНИЕ</h1>
+<h1 class="h1a">Доброе утро,<br>Елдос Куанышевич.<br><span class="grad">🟢 ПОКУПАТЬ ПОСТЕПЕННО: вероятность роста 80% на 2-6 недель</span></h1>
+<p class="lede" id="lede"></p>
+<details class="brief"><summary>Полное заключение консультанта ↓</summary><div class="full">Доброе утро, Елдос Куанышевич.<br><br>Официальный курс НБК <b>474.42 ₸</b>, рыночный <b>474.42 ₸</b>. Суммарный скор факторов +1.21: вероятность роста доллара на горизонте 2-6 недель ≈ <b>80%</b>. Краткосрочно (2-3 дня): покупать; среднесрочно: покупать постепенно. Это автоматическая облачная сводка; полный разбор с комментарием консультанта - в приложении Claude.<br><br>Вероятностная рекомендация: риск остаётся, решение принимаете Вы, Босс.</div></details>
+
+<div class="cells">
+  <div class="cell"><div class="k">Курс НБК<span class="info" tabindex="0">&#9432;<span class="tip">Официальный курс НБК ставится по итогам торгов предыдущего дня.</span></span></div><div class="v">474.42 <span class="unit">KZT</span></div><div class="mini">рынок 474.42</div></div>
+  <div class="cell"><div class="k">2–3 дня</div><div class="v buy">BUY <span class="unit">62%</span></div><div class="mini">краткосрочная стратегия</div></div>
+  <div class="cell"><div class="k">2–6 недель</div><div class="v buy">BUY <span class="unit">80%</span></div><div class="mini">среднесрочная стратегия</div></div>
+  <div class="cell"><div class="k">Отмена идеи</div><div class="v sell">467.3</div><div class="mini">закрепление ниже — сценарий ошибочен</div></div>
+</div>
+<div class="tmin"><span class="t">T−25 дней</span><span class="c">до налогового дедлайна · окно покупки</span></div>
+
+<div class="duo"><div class="g card strat buy"><div class="strat-head"><span class="strat-title">Краткосрочная стратегия</span><span class="chip">2-3 дня</span></div><div class="verdict">🟢 ПОКУПАТЬ</div><div class="action">Автоматическая оценка на 2-3 дня</div><div class="probbar"><div class="pb-up" style="width:62%">62% рост</div><div class="pb-dn" style="width:38%">38%</div></div><div class="kv"><span>Вероятность роста / падения<span class="info" tabindex="0">&#9432;<span class="tip">Оценка модели по взвешенным факторам; никогда не выше 80%.</span></span></span><b>62% / 38%</b></div><div class="kv"><span>Ожидаемый диапазон</span><b>470-480 ₸</b></div><div class="kv"><span>Вероятность реализации<span class="info" tabindex="0">&#9432;<span class="tip">Шанс достичь целевого диапазона в срок по историческим аналогам.</span></span></span><b>55%</b></div><div class="kv"><span>Уровень риска<span class="info" tabindex="0">&#9432;<span class="tip">Потенциальная потеря при отмене сценария с учётом волатильности.</span></span></span><b style="color:#fbbf24">средний</b></div><div class="comment">Краткосрочный рынок волатилен; ориентируйтесь на уровни плана.</div></div> <div class="g card strat buy"><div class="strat-head"><span class="strat-title">Среднесрочная стратегия</span><span class="chip">2-6 недель</span></div><div class="verdict">🟢 ПОКУПАТЬ ПОСТЕПЕННО</div><div class="action">Оценка сигнального движка на 2-6 недель</div><div class="probbar"><div class="pb-up" style="width:80%">80% рост</div><div class="pb-dn" style="width:20%">20%</div></div><div class="kv"><span>Вероятность роста / падения<span class="info" tabindex="0">&#9432;<span class="tip">Оценка модели по взвешенным факторам; никогда не выше 80%.</span></span></span><b>80% / 20%</b></div><div class="kv"><span>Ожидаемый диапазон</span><b>467.3-491.6 ₸</b></div><div class="kv"><span>Вероятность реализации<span class="info" tabindex="0">&#9432;<span class="tip">Шанс достичь целевого диапазона в срок по историческим аналогам.</span></span></span><b>80%</b></div><div class="kv"><span>Уровень риска<span class="info" tabindex="0">&#9432;<span class="tip">Потенциальная потеря при отмене сценария с учётом волатильности.</span></span></span><b style="color:#fbbf24">умеренный</b></div><div class="kv"><span>Цена отмены идеи<span class="info" tabindex="0">&#9432;<span class="tip">Цена, при которой идея считается ошибочной: покупки останавливаются.</span></span></span><b>467.3 ₸</b></div><div class="kv"><span>Цена фиксации прибыли<span class="info" tabindex="0">&#9432;<span class="tip">Цена, при которой рекомендуется зафиксировать прибыль.</span></span></span><b>486.3 ₸</b></div><div class="comment">Если курс закрепится ниже 467.3 — сценарий отменяется, укрепление тенге продолжается</div></div></div>
+
+<div class="g card" style="margin-top:14px"><div class="gaugerow">
+  <div class="ring" style="--p:80"><i>80%</i></div>
+  <div style="flex:1;min-width:220px"><div class="k">Вероятность роста · 2–6 недель</div><div class="bignum">80%</div><div class="muted">Облачная версия: сравнение считается по журналу.</div></div>
+  <div style="flex:2;min-width:240px" class="muted">Взвешенная сумма факторов = +1.21 → P(рост) 80%</div>
+</div></div>
+
+<div class="tabs" id="tabs">
+  <button class="tab on" data-p="p1"><span class="tn">01</span>План операции</button>
+  <button class="tab" data-p="p2"><span class="tn">02</span>Факторы</button>
+  <button class="tab" data-p="p3"><span class="tn">03</span>Изменения · триггеры</button>
+  <button class="tab" data-p="p4"><span class="tn">04</span>Горизонты · сценарии</button>
+  <button class="tab" data-p="p5"><span class="tn">05</span>Телеметрия</button>
+  <button class="tab" data-p="p6"><span class="tn">06</span>Журнал · модель</button>
+</div>
+
+<div class="pane on" id="p1">
+  <h2>Модуль 01 · план операции траншами</h2>
+  <div class="g card"><div class="muted" style="margin-bottom:12px">Доли — от суммы, которую Вы планируете обменять. Вероятностный план: решение на каждом шаге за Вами, Босс.</div>
+  <div class="plan"><div class="pstep "><div class="pshare">20%</div><div><div class="pwhen">Сейчас, около 474.42 ₸</div><div class="pnote">стартовый транш</div></div></div><div class="pstep "><div class="pshare">30%</div><div><div class="pwhen">При откате к 470 ₸</div><div class="pnote">докупка на слабости</div></div></div><div class="pstep "><div class="pshare">50%</div><div><div class="pwhen">При закреплении выше 482 ₸</div><div class="pnote">подтверждение сценария</div></div></div><div class="pstep pstop"><div class="pshare">СТОП</div><div><div class="pwhen">Ниже 467.3 ₸</div><div class="pnote">сценарий отменён</div></div></div></div>
+  <div class="comment" style="margin-top:14px">Босс, лимиты Вашего профиля: не более 30% свободных тенге в идее, вход траншами, стоп обязателен. Задайте вопрос через иконку 💬 - отвечу в Claude.</div></div>
+</div>
+
+<div class="pane" id="p2">
+  <h2>Модуль 02 · из чего складывается вероятность</h2>
+  <div class="g card"><div class="factor"><div class="f-name">Нефть Brent<span class="info" tabindex="0">&#9432;<span class="tip">Казахстан - сырьевой экспортёр: дешёвая нефть означает меньше долларов в страну, тенге слабеет с лагом 1-3 месяца.</span></span></div><div class="f-bar"><div class="f-up" style="width:100%"></div></div><div class="f-val f-up-t">&#9650; 24</div><div class="f-human">Оценка фактора: +2.00 (от -2 за падение USD до +2 за рост)</div></div><div class="factor"><div class="f-name">Сезонность<span class="info" tabindex="0">&#9432;<span class="tip">Средняя месячная динамика пары за 11 лет свободного курса. Август - худший месяц тенге.</span></span></div><div class="f-bar"><div class="f-up" style="width:96%"></div></div><div class="f-val f-up-t">&#9650; 23</div><div class="f-human">Оценка фактора: +1.94 (от -2 за падение USD до +2 за рост)</div></div><div class="factor"><div class="f-name">Курс рубля<span class="info" tabindex="0">&#9432;<span class="tip">Россия - крупнейший торговый партнёр: тенге исторически догоняет движения рубля.</span></span></div><div class="f-bar"><div class="f-up" style="width:88%"></div></div><div class="f-val f-up-t">&#9650; 21</div><div class="f-human">Оценка фактора: +1.71 (от -2 за падение USD до +2 за рост)</div></div><div class="factor"><div class="f-name">Техническая картина<span class="info" tabindex="0">&#9432;<span class="tip">Положение курса относительно скользящих средних и импульс последних дней.</span></span></div><div class="f-bar"><div class="f-up" style="width:75%"></div></div><div class="f-val f-up-t">&#9650; 18</div><div class="f-human">Оценка фактора: +1.49 (от -2 за падение USD до +2 за рост)</div></div><div class="factor"><div class="f-name">Индекс доллара DXY<span class="info" tabindex="0">&#9432;<span class="tip">Рост DXY - глобальное укрепление доллара, давит на валюты развивающихся рынков.</span></span></div><div class="f-bar"><div class="f-up" style="width:62%"></div></div><div class="f-val f-up-t">&#9650; 15</div><div class="f-human">Оценка фактора: +1.21 (от -2 за падение USD до +2 за рост)</div></div><div class="factor"><div class="f-name">Ставки НБК и ФРС<span class="info" tabindex="0">&#9432;<span class="tip">Сужение разницы ставок ослабляет главную опору тенге - высокую доходность тенговых активов.</span></span></div><div class="f-bar"><div class="f-up" style="width:50%"></div></div><div class="f-val f-up-t">&#9650; 12</div><div class="f-human">Оценка фактора: +1.00 (от -2 за падение USD до +2 за рост)</div></div><div class="total"><b>Итог:</b> Взвешенная сумма факторов = +1.21 → P(рост) 80%</div></div>
+</div>
+
+<div class="pane" id="p3">
+  <h2>Модуль 03 · динамика и условия пересмотра</h2>
+  <div class="duo" style="margin-top:0">
+    <div class="g card"><h3>Что изменилось со вчера</h3><ul class="nice"><li>[высокий] дневное движение +2.40%</li><li>[высокий] Brent -26.6%/мес при укреплении тенге — расхождение с фундаментом</li><li>[средний] расхождение с USD/RUB за месяц: +9.7 п.п.</li></ul></div>
+    <div class="g card"><h3 style="color:var(--dn)">Сигнал ослабнет, если:</h3><ul class="nice"><li>Brent развернётся вверх более чем на 10%</li><li>Курс закрепится ниже 467.3 ₸</li><li>НБК приостановит снижение ставки</li></ul>
+      <h3 style="color:var(--up);margin-top:16px">Сигнал усилится, если:</h3><ul class="nice"><li>Brent продолжит падение</li><li>Курс пробьёт 482 ₸</li><li>USD/RUB продолжит рост</li></ul></div>
+  </div>
+</div>
+
+<div class="pane" id="p4">
+  <h2>Модуль 04 · вероятности и сценарии</h2>
+  <div class="g card" style="margin-bottom:14px"><h3>Вероятность роста доллара по горизонтам</h3><div class="hz"><div class="hz-label">2-3 дня</div><div class="hz-bar"><div style="width:62%"></div></div><div class="hz-val">62%</div><div class="hz-com">техника и календарь</div></div><div class="hz"><div class="hz-label">1 неделя</div><div class="hz-bar"><div style="width:68%"></div></div><div class="hz-val">68%</div><div class="hz-com">переходный период</div></div><div class="hz"><div class="hz-label">2 недели</div><div class="hz-bar"><div style="width:74%"></div></div><div class="hz-val">74%</div><div class="hz-com">факторы набирают вес</div></div><div class="hz"><div class="hz-label">1 месяц</div><div class="hz-bar"><div style="width:80%"></div></div><div class="hz-val">80%</div><div class="hz-com">полный эффект фундамента</div></div></div>
+  <div class="grid"><div class="g card scen"><div class="scen-if">Если Brent -10 $</div><div class="scen-then neg">▲ 484-498 ₸</div><div class="muted">меньше экспортной выручки</div></div><div class="g card scen"><div class="scen-if">Если Brent +10 $</div><div class="scen-then pos">▼ 460-472 ₸</div><div class="muted">нефтяная поддержка тенге</div></div><div class="g card scen"><div class="scen-if">Если НБК снизит ставку на 1 п.п.</div><div class="scen-then neg">▲ +4…8 ₸</div><div class="muted">carry сжимается</div></div><div class="g card scen"><div class="scen-if">Если ФРС повысит ставку</div><div class="scen-then neg">▲ +3…6 ₸</div><div class="muted">глобальный доллар сильнее</div></div></div>
+</div>
+
+<div class="pane" id="p5">
+  <h2>Модуль 05 · телеметрия рынка</h2>
+  <div class="grid">
+    <div class="g card"><h3>Доллар — день</h3><div class="sub">каждые 30 минут · время Астаны</div><canvas id="c1d"></canvas></div>
+    <div class="g card"><h3>Доллар — неделя</h3><div class="sub">внутридневная динамика 5 торговых дней</div><canvas id="c1w"></canvas></div>
+    <div class="g card"><h3>Доллар — месяц</h3><canvas id="c1m"></canvas></div>
+    <div class="g card"><h3>Доллар — 2 года</h3><div class="sub">пик 546.96 · сент. 2025</div><canvas id="c2y"></canvas></div>
+    <div class="g card"><h3>Вся история с 2010</h3><div class="sub">ступени — девальвации</div><canvas id="call"></canvas></div>
+    <div class="g card"><h3>Нефть Brent, $</h3><div class="sub">−40% от пика — ключевой аргумент</div><canvas id="cbrent"></canvas></div>
+    <div class="g card"><h3>Индекс доллара DXY</h3><canvas id="cdxy"></canvas></div>
+    <div class="g card"><h3>Доллар/рубль</h3><canvas id="crub"></canvas></div>
+    <div class="g card"><h3>Доллар/юань</h3><div class="sub">Китай — второй якорь тенге после рубля</div><canvas id="ccny"></canvas></div>
+  </div>
+  <div class="g card" style="margin-top:14px"><h3>Индикаторы</h3>
+    <div class="kv"><span>Индикатор RSI<span class="info" tabindex="0">&#9432;<span class="tip">Индекс относительной силы: ниже 30 - доллар перепродан, выше 70 - перекуплен, 40-60 - нейтрально.</span></span></span><b>52.0 · нейтрально</b></div>
+    <div class="kv"><span>Скользящие средние<span class="info" tabindex="0">&#9432;<span class="tip">Средний курс за N дней: курс выше средней - тренд вверх, ниже - вниз.</span></span> · 20 дней</span><b>474.35 ₸</b></div>
+    <div class="kv"><span>Средняя за 200 дней (год)</span><b>496.6 ₸ · курс ниже на 4.5%</b></div>
+    <div class="kv"><span>Привычные уровни<span class="info" tabindex="0">&#9432;<span class="tip">Уровни, где курс проводил больше всего времени за полгода.</span></span></span><b>460, 470, 475, 480, 490 ₸</b></div>
+  </div>
+</div>
+
+<div class="pane" id="p6">
+  <h2>Модуль 06 · журнал решений и самообучение</h2>
+  <div class="g card jcard"><div class="j-date">2026-07-02</div><div class="j-row"><span>Рекомендация</span><p>ПОКУПАТЬ ПОСТЕПЕННО @ 474.42, цель 491.6, стоп 467.3, уверенность 9/10</p></div><div class="j-row"><span>Почему</span><p>Нефть Brent +2.0; Сезонность +1.9; Курс рубля +1.7</p></div><div class="j-row"><span>Что произошло</span><p>проверка по журналу через 1/3/7/30 дней</p></div><div class="j-row"><span>Чему научился</span><p>автоматическая запись облачной версии</p></div><div class="j-row"><span>Веса модели</span><p>текущие веса - см. data/factor_weights.json</p></div></div>
+  <div class="g card" style="margin-top:14px"><h3>Проверка на истории (бэктест<span class="info" tabindex="0">&#9432;<span class="tip">Проверка стратегии на 10 годах истории.</span></span>)</h3>
+    <div class="kv"><span>«Покупать любую просадку» — отклонено</span><b class="neg">−9.8% · успешных<span class="info" tabindex="0">&#9432;<span class="tip">Доля прибыльных сделок.</span></span> 42%</b></div>
+    <div class="kv"><span>Покупка по факторам — текущий подход</span><b class="pos">+20.8% · успешных<span class="info" tabindex="0">&#9432;<span class="tip">Доля прибыльных сделок.</span></span> 52% · макс. просадка<span class="info" tabindex="0">&#9432;<span class="tip">Максимальная просадка капитала на истории.</span></span> ~9%</b></div>
+    <div class="kv"><span>Пассивная альтернатива<span class="info" tabindex="0">&#9432;<span class="tip">Сравнение: просто купить доллары и держать.</span></span></span><b>+42% за 10 лет (среднегодовых<span class="info" tabindex="0">&#9432;<span class="tip">Среднегодовая доходность.</span></span> 3.6%)</b></div>
+    <div class="kv"><span>Депозит KZT по ставке НБК<span class="info" tabindex="0">&#9432;<span class="tip">Разница ставок НБК и ФРС: высокая ставка НБК удерживает тенге крепким.</span></span></span><b>~9–16%/год, но риск девальваций</b></div>
+    <div class="comment">Каждое утро агент сверяет прогноз с фактом: подтвердившийся фактор +0.02 к весу, ложный −0.02. История — в journal/.</div>
+  </div>
+</div>
+
+<div class="disclaimer" style="display:none" id="cometlegend">☄ Комета на небе — вестник сигнала дня: зелёная (вверх) — покупать, красная (вниз) — продавать или аномалия, белая — ждать. Появляется редко, как и хорошие сделки.</div>
+<div class="disclaimer">Вероятностные рекомендации на основе открытых данных (НБК, KASE, Yahoo Finance, ФРС). Преимущество не гарантирует результат; риск остаётся; решение принимает пользователь.</div>
+</main>
+
+<button class="fab" id="fab" aria-label="Спросить консультанта">💬</button>
+<div id="chatpop">
+  <div class="t">Вопрос консультанту</div>
+  <input id="q" placeholder="Например: почему покупать сейчас?" onkeydown="if(event.key==='Enter')goChat()">
+  <button class="go" onclick="goChat()">Спросить Claude →</button>
+  <div class="m">Откроется диалог со мной в Claude — отвечу со свежими данными. Ничего не расходуется, пока Вы не спросите.</div>
+</div>
+
+<script>
+const S={"kzt_1m": [["2026-06-02", 488.64], ["2026-06-03", 485.61], ["2026-06-04", 482.79], ["2026-06-07", 484.16], ["2026-06-08", 483.99], ["2026-06-09", 485.55], ["2026-06-10", 473.04], ["2026-06-11", 473.15], ["2026-06-14", 473.99], ["2026-06-15", 474.65], ["2026-06-16", 473.01], ["2026-06-17", 474.47], ["2026-06-18", 473.32], ["2026-06-21", 472.92], ["2026-06-22", 472.48], ["2026-06-23", 472.18], ["2026-06-24", 471.37], ["2026-06-25", 468.23], ["2026-06-28", 470.46], ["2026-06-29", 469.58], ["2026-06-30", 463.29], ["2026-07-02", 474.42]], "kzt_2y": [["2024-07-02", 469.53], ["2024-07-09", 477.9], ["2024-07-16", 472.49], ["2024-07-23", 470.87], ["2024-07-30", 472.31], ["2024-08-06", 475.65], ["2024-08-13", 477.28], ["2024-08-20", 472.45], ["2024-08-27", 477.67], ["2024-09-03", 480.64], ["2024-09-10", 474.86], ["2024-09-17", 478.0], ["2024-09-24", 477.06], ["2024-10-01", 478.08], ["2024-10-08", 484.77], ["2024-10-15", 485.17], ["2024-10-22", 482.45], ["2024-10-30", 487.51], ["2024-11-06", 487.67], ["2024-11-13", 493.72], ["2024-11-20", 493.44], ["2024-11-27", 495.0], ["2024-12-04", 520.65], ["2024-12-11", 508.67], ["2024-12-18", 521.25], ["2024-12-25", 514.86], ["2025-01-02", 521.56], ["2025-01-09", 524.38], ["2025-01-16", 527.34], ["2025-01-23", 518.15], ["2025-01-30", 514.8], ["2025-02-06", 514.22], ["2025-02-13", 501.55], ["2025-02-20", 498.93], ["2025-02-27", 497.68], ["2025-03-06", 492.83], ["2025-03-13", 489.1], ["2025-03-20", 500.79], ["2025-03-27", 497.9], ["2025-04-02", 500.33], ["2025-04-09", 515.98], ["2025-04-16", 520.74], ["2025-04-27", 512.26], ["2025-05-04", 515.18], ["2025-05-11", 513.03], ["2025-05-18", 507.84], ["2025-05-25", 507.97], ["2025-06-01", 507.49], ["2025-06-08", 508.25], ["2025-06-15", 508.07], ["2025-06-22", 519.81], ["2025-06-29", 517.3], ["2025-07-06", 516.77], ["2025-07-13", 519.8], ["2025-07-20", 530.99], ["2025-07-27", 541.43], ["2025-08-03", 531.77], ["2025-08-10", 537.15], ["2025-08-17", 538.31], ["2025-08-24", 529.08], ["2025-08-31", 535.26], ["2025-09-07", 533.44], ["2025-09-14", 538.38], ["2025-09-21", 539.46], ["2025-09-28", 540.5], ["2025-10-05", 544.9], ["2025-10-12", 533.98], ["2025-10-19", 536.78], ["2025-10-27", 535.08], ["2025-11-03", 525.43], ["2025-11-10", 521.61], ["2025-11-17", 521.32], ["2025-11-24", 517.64], ["2025-12-01", 509.21], ["2025-12-08", 503.06], ["2025-12-15", 518.16], ["2025-12-22", 514.97], ["2025-12-30", 499.68], ["2026-01-07", 506.89], ["2026-01-14", 506.78], ["2026-01-21", 505.19], ["2026-01-28", 500.64], ["2026-02-04", 498.58], ["2026-02-11", 489.25], ["2026-02-18", 487.5], ["2026-02-25", 496.75], ["2026-03-04", 497.47], ["2026-03-11", 485.11], ["2026-03-18", 477.85], ["2026-03-25", 479.25], ["2026-03-31", 473.59], ["2026-04-07", 462.18], ["2026-04-14", 472.44], ["2026-04-21", 461.73], ["2026-04-28", 455.71], ["2026-05-05", 461.99], ["2026-05-12", 461.32], ["2026-05-19", 468.44], ["2026-05-26", 479.12], ["2026-06-02", 488.64], ["2026-06-09", 485.55], ["2026-06-16", 473.01], ["2026-06-23", 472.18], ["2026-06-30", 463.29]], "kzt_all": [["2010-01-04", 176.2], ["2010-02-01", 175.88], ["2010-03-01", 175.75], ["2010-04-01", 174.28], ["2010-05-02", 174.22], ["2010-06-01", 174.31], ["2010-07-01", 174.86], ["2010-08-01", 175.51], ["2010-09-01", 174.86], ["2010-10-03", 174.68], ["2010-11-01", 174.43], ["2010-12-01", 175.47], ["2011-01-03", 175.06], ["2011-02-01", 174.78], ["2011-03-01", 173.79], ["2011-04-03", 172.85], ["2011-05-01", 174.24], ["2011-06-01", 173.38], ["2011-07-03", 173.34], ["2011-08-01", 173.98], ["2011-09-01", 174.64], ["2011-10-02", 176.02], ["2011-11-01", 175.9], ["2011-12-01", 175.45], ["2012-01-02", 175.92], ["2012-02-01", 176.28], ["2012-03-01", 175.36], ["2012-04-01", 175.62], ["2012-05-01", 175.5], ["2012-06-03", 174.69], ["2012-07-01", 176.16], ["2012-08-01", 178.68], ["2012-09-02", 177.32], ["2012-10-01", 177.86], ["2012-11-01", 179.08], ["2012-12-03", 178.3], ["2013-01-01", 178.01], ["2013-02-01", 178.36], ["2013-03-01", 178.85], ["2013-04-01", 178.4], ["2013-05-01", 179.28], ["2013-06-02", 179.01], ["2013-07-01", 179.28], ["2013-08-01", 181.76], ["2013-09-01", 181.47], ["2013-10-01", 181.99], ["2013-11-01", 182.64], ["2013-12-02", 182.27], ["2014-01-01", 182.14], ["2014-02-03", 184.01], ["2014-03-03", 182.14], ["2014-04-01", 179.89], ["2014-05-01", 179.17], ["2014-06-01", 181.62], ["2014-07-01", 181.43], ["2014-08-03", 180.3], ["2014-09-01", 179.89], ["2014-10-01", 179.21], ["2014-11-03", 179.48], ["2014-12-01", 179.49], ["2015-01-01", 180.41], ["2015-02-02", 182.58], ["2015-03-02", 182.42], ["2015-04-01", 182.99], ["2015-05-03", 182.93], ["2015-06-01", 183.24], ["2015-07-01", 183.47], ["2015-08-02", 185.41], ["2015-09-01", 236.99], ["2015-10-01", 268.66], ["2015-11-02", 277.43], ["2015-12-01", 304.75], ["2016-01-01", 338.89], ["2016-02-01", 364.58], ["2016-03-01", 346.65], ["2016-04-03", 339.85], ["2016-05-01", 323.27], ["2016-06-01", 334.48], ["2016-07-03", 334.45], ["2016-08-01", 349.66], ["2016-09-01", 337.04], ["2016-10-02", 330.77], ["2016-11-01", 332.18], ["2016-12-01", 336.76], ["2017-01-02", 331.97], ["2017-02-01", 319.36], ["2017-03-01", 312.81], ["2017-04-02", 311.58], ["2017-05-01", 313.08], ["2017-06-01", 310.35], ["2017-07-02", 318.85], ["2017-08-01", 329.49], ["2017-09-03", 337.01], ["2017-10-01", 340.03], ["2017-11-01", 332.09], ["2017-12-01", 327.19], ["2018-01-01", 329.82], ["2018-02-01", 322.34], ["2018-03-01", 319.97], ["2018-04-01", 316.56], ["2018-05-01", 327.88], ["2018-06-03", 329.57], ["2018-07-01", 340.65], ["2018-08-01", 348.57], ["2018-09-02", 363.29], ["2018-10-01", 363.95], ["2018-11-01", 370.45], ["2018-12-03", 372.51], ["2019-01-01", 384.0], ["2019-02-01", 378.95], ["2019-03-01", 373.82], ["2019-04-01", 379.45], ["2019-05-01", 380.27], ["2019-06-02", 378.21], ["2019-07-01", 380.35], ["2019-08-01", 384.78], ["2019-09-01", 387.31], ["2019-10-01", 384.71], ["2019-11-01", 386.24], ["2019-12-02", 383.09], ["2020-01-01", 380.17], ["2020-02-03", 376.75], ["2020-03-02", 379.11], ["2020-04-01", 447.08], ["2020-05-03", 420.49], ["2020-06-01", 405.01], ["2020-07-01", 404.26], ["2020-08-02", 419.44], ["2020-09-01", 415.77], ["2020-10-01", 426.81], ["2020-11-02", 430.31], ["2020-12-01", 423.27], ["2021-01-01", 418.92], ["2021-02-01", 420.95], ["2021-03-01", 415.14], ["2021-04-01", 425.11], ["2021-05-02", 429.75], ["2021-06-01", 425.61], ["2021-07-01", 424.59], ["2021-08-01", 422.99], ["2021-09-01", 423.74], ["2021-10-03", 424.03], ["2021-11-01", 425.46], ["2021-12-01", 437.47], ["2022-01-03", 432.44], ["2022-02-01", 432.1], ["2022-03-01", 487.16], ["2022-04-03", 473.71], ["2022-05-01", 442.01], ["2022-06-01", 428.38], ["2022-07-03", 461.35], ["2022-08-01", 477.5], ["2022-09-01", 468.13], ["2022-10-02", 473.32], ["2022-11-01", 464.5], ["2022-12-01", 466.04], ["2023-01-02", 460.05], ["2023-02-01", 457.78], ["2023-03-01", 442.19], ["2023-04-02", 452.07], ["2023-05-01", 448.23], ["2023-06-01", 445.77], ["2023-07-02", 445.88], ["2023-08-01", 441.94], ["2023-09-03", 456.87], ["2023-10-01", 475.96], ["2023-11-01", 466.1], ["2023-12-01", 456.78], ["2024-01-01", 455.09], ["2024-02-01", 446.44], ["2024-03-01", 448.66], ["2024-04-01", 444.23], ["2024-05-01", 439.58], ["2024-06-02", 443.95], ["2024-07-01", 471.47], ["2024-08-01", 471.41], ["2024-09-01", 479.68], ["2024-10-01", 478.08], ["2024-11-01", 485.21], ["2024-12-02", 512.89], ["2025-01-02", 521.56], ["2025-02-03", 523.41], ["2025-03-03", 496.6], ["2025-04-01", 500.89], ["2025-05-01", 512.0], ["2025-06-01", 507.49], ["2025-07-01", 516.68], ["2025-08-03", 531.77], ["2025-09-01", 535.71], ["2025-10-01", 545.74], ["2025-11-03", 525.43], ["2025-12-01", 509.21], ["2026-01-02", 504.84], ["2026-02-02", 504.42], ["2026-03-02", 494.72], ["2026-04-01", 472.71], ["2026-05-03", 460.73], ["2026-06-01", 486.54], ["2026-07-02", 474.42]], "brent": [["2023-07-03", 74.65], ["2023-07-11", 79.4], ["2023-07-18", 79.63], ["2023-07-25", 83.64], ["2023-08-01", 84.91], ["2023-08-08", 86.17], ["2023-08-15", 84.89], ["2023-08-22", 84.03], ["2023-08-29", 85.49], ["2023-09-06", 90.6], ["2023-09-13", 91.88], ["2023-09-20", 93.53], ["2023-09-27", 96.55], ["2023-10-04", 85.81], ["2023-10-11", 85.82], ["2023-10-18", 91.5], ["2023-10-25", 90.13], ["2023-11-01", 84.63], ["2023-11-08", 79.54], ["2023-11-15", 81.18], ["2023-11-22", 81.96], ["2023-11-29", 83.1], ["2023-12-06", 74.3], ["2023-12-13", 74.26], ["2023-12-20", 79.7], ["2023-12-28", 78.39], ["2024-01-05", 78.76], ["2024-01-12", 78.29], ["2024-01-22", 80.06], ["2024-01-29", 82.4], ["2024-02-05", 77.99], ["2024-02-12", 82.0], ["2024-02-20", 82.34], ["2024-02-27", 83.65], ["2024-03-05", 82.04], ["2024-03-12", 81.92], ["2024-03-19", 87.38], ["2024-03-26", 86.25], ["2024-04-03", 89.35], ["2024-04-10", 90.48], ["2024-04-17", 87.29], ["2024-04-24", 88.02], ["2024-05-01", 83.44], ["2024-05-08", 83.58], ["2024-05-15", 82.75], ["2024-05-22", 81.9], ["2024-05-30", 81.86], ["2024-06-06", 79.87], ["2024-06-13", 82.75], ["2024-06-21", 85.24], ["2024-06-28", 86.41], ["2024-07-08", 85.75], ["2024-07-15", 84.85], ["2024-07-22", 82.4], ["2024-07-29", 79.78], ["2024-08-05", 76.3], ["2024-08-12", 82.3], ["2024-08-19", 77.66], ["2024-08-26", 81.43], ["2024-09-03", 73.75], ["2024-09-10", 69.19], ["2024-09-17", 73.7], ["2024-09-24", 75.17], ["2024-10-01", 73.56], ["2024-10-08", 77.18], ["2024-10-15", 74.25], ["2024-10-22", 76.04], ["2024-10-29", 71.12], ["2024-11-05", 75.53], ["2024-11-12", 71.89], ["2024-11-19", 73.31], ["2024-11-26", 72.81], ["2024-12-04", 72.31], ["2024-12-11", 73.52], ["2024-12-18", 73.39], ["2024-12-26", 73.26], ["2025-01-03", 76.51], ["2025-01-10", 79.76], ["2025-01-17", 80.79], ["2025-01-27", 77.08], ["2025-02-03", 75.96], ["2025-02-10", 75.87], ["2025-02-18", 75.84], ["2025-02-25", 73.02], ["2025-03-04", 71.04], ["2025-03-11", 69.56], ["2025-03-18", 70.56], ["2025-03-25", 73.02], ["2025-04-01", 74.49], ["2025-04-08", 62.82], ["2025-04-15", 64.67], ["2025-04-23", 66.12], ["2025-04-30", 63.12], ["2025-05-07", 61.12], ["2025-05-14", 66.09], ["2025-05-21", 64.91], ["2025-05-29", 64.15], ["2025-06-05", 65.34], ["2025-06-12", 69.36], ["2025-06-20", 77.01], ["2025-06-27", 67.77], ["2025-07-04", 68.29], ["2025-07-11", 70.36], ["2025-07-18", 69.28], ["2025-07-25", 68.44], ["2025-08-01", 69.67], ["2025-08-08", 66.59], ["2025-08-15", 65.85], ["2025-08-22", 67.73], ["2025-08-29", 68.12], ["2025-09-08", 66.02], ["2025-09-15", 67.44], ["2025-09-22", 66.57], ["2025-09-29", 67.97], ["2025-10-06", 65.47], ["2025-10-13", 63.32], ["2025-10-20", 61.01], ["2025-10-27", 65.62], ["2025-11-03", 64.89], ["2025-11-10", 64.06], ["2025-11-17", 64.2], ["2025-11-24", 63.37], ["2025-12-02", 62.45], ["2025-12-09", 61.94], ["2025-12-16", 58.92], ["2025-12-23", 62.38], ["2025-12-31", 60.85], ["2026-01-08", 61.99], ["2026-01-15", 63.76], ["2026-01-23", 65.88], ["2026-01-30", 70.69], ["2026-02-06", 68.05], ["2026-02-13", 67.75], ["2026-02-23", 71.49], ["2026-03-02", 77.74], ["2026-03-09", 98.96], ["2026-03-16", 100.21], ["2026-03-23", 99.94], ["2026-03-30", 112.78], ["2026-04-07", 109.27], ["2026-04-14", 94.79], ["2026-04-21", 98.48], ["2026-04-28", 111.26], ["2026-05-05", 109.87], ["2026-05-12", 107.77], ["2026-05-19", 111.28], ["2026-05-27", 94.29], ["2026-06-03", 97.81], ["2026-06-10", 93.1], ["2026-06-17", 79.55], ["2026-06-25", 75.26], ["2026-07-02", 70.51]], "dxy": [["2023-07-03", 102.99], ["2023-07-11", 101.73], ["2023-07-18", 99.94], ["2023-07-25", 101.35], ["2023-08-01", 102.3], ["2023-08-08", 102.53], ["2023-08-15", 103.21], ["2023-08-22", 103.56], ["2023-08-29", 103.55], ["2023-09-06", 104.86], ["2023-09-13", 104.77], ["2023-09-20", 105.16], ["2023-09-27", 106.67], ["2023-10-04", 106.8], ["2023-10-11", 105.82], ["2023-10-18", 106.57], ["2023-10-25", 106.53], ["2023-11-01", 106.88], ["2023-11-08", 105.59], ["2023-11-15", 104.39], ["2023-11-22", 103.92], ["2023-11-30", 103.5], ["2023-12-07", 103.54], ["2023-12-14", 101.96], ["2023-12-21", 101.84], ["2023-12-29", 101.33], ["2024-01-08", 102.21], ["2024-01-16", 103.36], ["2024-01-23", 103.62], ["2024-01-30", 103.4], ["2024-02-06", 104.18], ["2024-02-13", 104.96], ["2024-02-21", 104.01], ["2024-02-28", 103.98], ["2024-03-06", 103.37], ["2024-03-13", 102.79], ["2024-03-20", 103.41], ["2024-03-27", 104.35], ["2024-04-04", 104.12], ["2024-04-11", 105.28], ["2024-04-18", 106.15], ["2024-04-25", 105.6], ["2024-05-02", 105.3], ["2024-05-09", 105.23], ["2024-05-16", 104.46], ["2024-05-23", 105.11], ["2024-05-31", 104.67], ["2024-06-07", 104.89], ["2024-06-14", 105.55], ["2024-06-24", 105.47], ["2024-07-01", 105.9], ["2024-07-09", 105.12], ["2024-07-16", 104.27], ["2024-07-23", 104.45], ["2024-07-30", 104.55], ["2024-08-06", 102.97], ["2024-08-13", 102.56], ["2024-08-20", 101.44], ["2024-08-27", 100.55], ["2024-09-04", 101.36], ["2024-09-11", 101.68], ["2024-09-18", 100.6], ["2024-09-25", 100.92], ["2024-10-02", 101.68], ["2024-10-09", 102.93], ["2024-10-16", 103.59], ["2024-10-23", 104.43], ["2024-10-30", 103.99], ["2024-11-06", 105.09], ["2024-11-13", 106.48], ["2024-11-20", 106.68], ["2024-11-27", 106.08], ["2024-12-05", 105.71], ["2024-12-12", 106.96], ["2024-12-19", 108.41], ["2024-12-27", 108.0], ["2025-01-06", 108.26], ["2025-01-13", 109.96], ["2025-01-21", 108.06], ["2025-01-28", 107.87], ["2025-02-04", 107.96], ["2025-02-11", 107.96], ["2025-02-19", 107.17], ["2025-02-26", 106.42], ["2025-03-05", 105.74], ["2025-03-12", 103.61], ["2025-03-19", 103.43], ["2025-03-26", 104.55], ["2025-04-02", 103.81], ["2025-04-09", 102.9], ["2025-04-16", 99.38], ["2025-04-24", 99.29], ["2025-05-01", 100.25], ["2025-05-08", 100.64], ["2025-05-15", 100.88], ["2025-05-22", 99.96], ["2025-05-29", 99.28], ["2025-06-05", 98.74], ["2025-06-12", 97.92], ["2025-06-20", 98.71], ["2025-06-27", 97.4], ["2025-07-07", 97.48], ["2025-07-14", 98.08], ["2025-07-21", 97.85], ["2025-07-28", 98.66], ["2025-08-04", 98.78], ["2025-08-11", 98.52], ["2025-08-18", 98.17], ["2025-08-25", 98.43], ["2025-09-02", 98.4], ["2025-09-09", 97.79], ["2025-09-16", 96.63], ["2025-09-23", 97.26], ["2025-09-30", 97.77], ["2025-10-07", 98.58], ["2025-10-14", 99.05], ["2025-10-21", 98.93], ["2025-10-28", 98.69], ["2025-11-04", 100.22], ["2025-11-11", 99.46], ["2025-11-18", 99.55], ["2025-11-25", 99.66], ["2025-12-03", 98.85], ["2025-12-10", 98.79], ["2025-12-17", 98.37], ["2025-12-24", 97.98], ["2026-01-02", 98.42], ["2026-01-09", 99.13], ["2026-01-16", 99.39], ["2026-01-26", 97.04], ["2026-02-02", 97.61], ["2026-02-09", 96.82], ["2026-02-17", 97.16], ["2026-02-24", 97.88], ["2026-03-03", 99.05], ["2026-03-10", 98.83], ["2026-03-17", 99.58], ["2026-03-24", 99.43], ["2026-03-31", 99.96], ["2026-04-08", 99.13], ["2026-04-15", 98.06], ["2026-04-22", 98.59], ["2026-04-29", 98.92], ["2026-05-06", 98.02], ["2026-05-13", 98.48], ["2026-05-20", 99.11], ["2026-05-28", 99.02], ["2026-06-04", 99.41], ["2026-06-11", 99.86], ["2026-06-18", 100.85], ["2026-06-26", 101.36]], "rub": [["2023-07-02", 87.915], ["2023-07-09", 91.225], ["2023-07-16", 90.215], ["2023-07-23", 90.465], ["2023-07-30", 92.025], ["2023-08-06", 95.84], ["2023-08-13", 99.96], ["2023-08-20", 95.165], ["2023-08-27", 95.465], ["2023-09-03", 96.37], ["2023-09-10", 97.715], ["2023-09-17", 96.765], ["2023-09-24", 96.265], ["2023-10-01", 97.965], ["2023-10-08", 100.965], ["2023-10-15", 97.665], ["2023-10-22", 95.415], ["2023-10-30", 94.165], ["2023-11-06", 91.696], ["2023-11-13", 92.17], ["2023-11-20", 89.34], ["2023-11-27", 89.245], ["2023-12-04", 91.19], ["2023-12-11", 92.12], ["2023-12-18", 90.615], ["2023-12-25", 92.09], ["2024-01-01", 89.215], ["2024-01-08", 90.895], ["2024-01-15", 89.89], ["2024-01-22", 89.42], ["2024-01-29", 88.0], ["2024-02-05", 90.99], ["2024-02-12", 91.37], ["2024-02-19", 92.27], ["2024-02-26", 93.04], ["2024-03-04", 91.49], ["2024-03-11", 90.94], ["2024-03-18", 92.52], ["2024-03-25", 92.12], ["2024-03-31", 92.57], ["2024-04-07", 92.57], ["2024-04-14", 93.3], ["2024-04-21", 93.7], ["2024-04-28", 92.27], ["2024-05-05", 93.26], ["2024-05-12", 91.62], ["2024-05-19", 90.745], ["2024-05-26", 91.62], ["2024-06-02", 90.42], ["2024-06-09", 88.834], ["2024-06-16", 88.064], ["2024-06-23", 87.344], ["2024-06-30", 85.509], ["2024-07-07", 87.193], ["2024-07-14", 86.767], ["2024-07-21", 86.885], ["2024-07-28", 84.996], ["2024-08-04", 84.14], ["2024-08-11", 86.8], ["2024-08-18", 89.464], ["2024-08-25", 90.261], ["2024-09-01", 90.677], ["2024-09-08", 89.154], ["2024-09-15", 89.736], ["2024-09-22", 91.749], ["2024-09-29", 94.229], ["2024-10-06", 94.797], ["2024-10-13", 95.882], ["2024-10-20", 94.953], ["2024-10-28", 97.243], ["2024-11-04", 97.021], ["2024-11-11", 97.064], ["2024-11-18", 99.982], ["2024-11-25", 103.704], ["2024-12-02", 106.503], ["2024-12-09", 97.965], ["2024-12-16", 102.286], ["2024-12-23", 101.842], ["2024-12-30", 104.519], ["2025-01-07", 107.496], ["2025-01-14", 102.745], ["2025-01-21", 100.997], ["2025-01-28", 97.365], ["2025-02-04", 99.746], ["2025-02-11", 96.616], ["2025-02-18", 91.497], ["2025-02-25", 87.737], ["2025-03-04", 89.696], ["2025-03-11", 87.62], ["2025-03-18", 83.446], ["2025-03-25", 83.872], ["2025-03-31", 82.994], ["2025-04-07", 86.146], ["2025-04-14", 82.249], ["2025-04-23", 82.994], ["2025-04-30", 82.018], ["2025-05-07", 80.621], ["2025-05-14", 80.372], ["2025-05-21", 79.885], ["2025-05-28", 79.864], ["2025-06-04", 79.246], ["2025-06-11", 79.499], ["2025-06-18", 78.496], ["2025-06-25", 78.243], ["2025-07-02", 78.921], ["2025-07-09", 78.196], ["2025-07-16", 78.247], ["2025-07-23", 78.391], ["2025-07-30", 81.249], ["2025-08-06", 79.998], ["2025-08-13", 79.447], ["2025-08-20", 80.497], ["2025-08-27", 80.348], ["2025-09-03", 80.997], ["2025-09-10", 84.494], ["2025-09-17", 84.004], ["2025-09-24", 83.756], ["2025-10-01", 82.501], ["2025-10-08", 81.445], ["2025-10-15", 78.65], ["2025-10-22", 81.494], ["2025-10-30", 79.995], ["2025-11-06", 81.347], ["2025-11-13", 81.271], ["2025-11-20", 80.543], ["2025-11-27", 78.496], ["2025-12-04", 76.995], ["2025-12-11", 78.245], ["2025-12-18", 80.497], ["2025-12-26", 78.946], ["2026-01-05", 79.348], ["2026-01-12", 78.29], ["2026-01-19", 76.919], ["2026-01-26", 74.099], ["2026-02-02", 75.576], ["2026-02-09", 75.938], ["2026-02-16", 76.378], ["2026-02-23", 75.573], ["2026-03-02", 76.731], ["2026-03-09", 79.963], ["2026-03-16", 80.147], ["2026-03-23", 83.046], ["2026-03-29", 80.815], ["2026-04-05", 80.406], ["2026-04-12", 76.549], ["2026-04-19", 75.511], ["2026-04-26", 74.525], ["2026-05-03", 74.976], ["2026-05-10", 74.418], ["2026-05-17", 72.84], ["2026-05-24", 70.119], ["2026-05-31", 71.228], ["2026-06-07", 73.682], ["2026-06-14", 72.28], ["2026-06-21", 72.262], ["2026-06-28", 78.968]], "kzt_1d": [["02.07 00:00", 478.8], ["02.07 00:30", 478.77], ["02.07 01:00", 478.87], ["02.07 01:30", 478.8], ["02.07 02:00", 478.89], ["02.07 02:30", 478.82], ["02.07 03:00", 478.87], ["02.07 03:30", 478.86], ["02.07 04:00", 478.84], ["02.07 04:30", 478.91], ["02.07 05:00", 478.85], ["02.07 05:30", 478.82], ["02.07 06:00", 478.9], ["02.07 06:30", 478.82], ["02.07 07:00", 478.82], ["02.07 07:30", 478.81], ["02.07 08:00", 478.88], ["02.07 08:30", 478.82], ["02.07 09:00", 478.82], ["02.07 09:30", 478.85], ["02.07 10:00", 477.84], ["02.07 10:30", 476.35], ["02.07 11:00", 476.72], ["02.07 11:30", 474.83], ["02.07 12:00", 473.4], ["02.07 12:30", 472.82], ["02.07 13:00", 473.19], ["02.07 13:30", 472.07], ["02.07 14:00", 473.02], ["02.07 14:30", 474.09], ["02.07 15:00", 475.56], ["02.07 15:30", 474.14], ["02.07 16:00", 474.01], ["02.07 16:30", 473.59], ["02.07 17:00", 473.66], ["02.07 17:30", 473.73], ["02.07 18:00", 473.81], ["02.07 18:30", 473.79], ["02.07 19:00", 473.79], ["02.07 19:30", 473.43], ["02.07 20:00", 473.81], ["02.07 20:30", 473.83], ["02.07 20:52", 473.77]], "kzt_1w": [["26.06 04:00", 485.23], ["26.06 05:00", 485.23], ["26.06 06:00", 485.23], ["26.06 07:00", 485.23], ["26.06 08:00", 485.23], ["26.06 09:00", 484.93], ["26.06 10:00", 485.34], ["26.06 11:00", 487.09], ["26.06 12:00", 486.32], ["26.06 13:00", 486.5], ["26.06 14:00", 485.39], ["26.06 15:00", 484.67], ["26.06 16:00", 484.97], ["26.06 17:00", 485.39], ["26.06 18:00", 485.61], ["26.06 19:00", 485.66], ["26.06 20:00", 485.69], ["26.06 21:00", 485.72], ["26.06 22:00", 485.71], ["26.06 23:00", 485.7], ["27.06 00:00", 485.77], ["27.06 01:00", 485.76], ["27.06 02:00", 485.79], ["29.06 04:30", 485.64], ["29.06 06:00", 485.94], ["29.06 07:00", 485.92], ["29.06 08:00", 485.98], ["29.06 09:00", 485.83], ["29.06 10:00", 486.78], ["29.06 11:00", 486.24], ["29.06 12:00", 485.66], ["29.06 13:00", 485.58], ["29.06 14:00", 485.42], ["29.06 15:00", 485.24], ["29.06 16:00", 484.99], ["29.06 17:00", 482.48], ["29.06 18:00", 483.5], ["29.06 19:00", 484.45], ["29.06 20:00", 484.45], ["29.06 21:00", 484.8], ["29.06 22:00", 484.87], ["29.06 23:00", 484.9], ["30.06 00:00", 485.0], ["30.06 01:00", 485.04], ["30.06 02:00", 484.97], ["30.06 03:30", 484.65], ["30.06 04:30", 484.72], ["30.06 22:30", 479.03], ["30.06 23:30", 479.14], ["01.07 00:30", 479.2], ["01.07 01:30", 479.18], ["01.07 02:30", 478.74], ["01.07 03:30", 478.75], ["01.07 04:30", 478.9], ["01.07 05:30", 477.91], ["01.07 06:30", 478.38], ["01.07 07:30", 478.91], ["01.07 08:30", 479.04], ["01.07 09:30", 478.57], ["01.07 10:30", 479.03], ["01.07 11:30", 478.97], ["01.07 12:30", 479.5], ["01.07 13:30", 480.19], ["01.07 14:30", 479.89], ["01.07 15:30", 478.96], ["01.07 16:30", 478.83], ["01.07 17:30", 478.53], ["01.07 18:30", 478.46], ["01.07 20:30", 478.75], ["01.07 21:30", 478.76], ["01.07 22:30", 478.85], ["01.07 23:30", 478.8], ["02.07 00:30", 478.77], ["02.07 01:30", 478.8], ["02.07 02:30", 478.82], ["02.07 03:30", 478.86], ["02.07 04:30", 478.91], ["02.07 05:30", 478.82], ["02.07 06:30", 478.82], ["02.07 07:30", 478.81], ["02.07 08:30", 478.82], ["02.07 09:30", 478.85], ["02.07 10:30", 476.35], ["02.07 11:30", 474.83], ["02.07 12:30", 472.82], ["02.07 13:30", 472.07], ["02.07 14:30", 474.09], ["02.07 15:30", 474.14], ["02.07 16:30", 473.59], ["02.07 17:30", 473.73], ["02.07 18:30", 473.79], ["02.07 19:30", 473.43], ["02.07 20:30", 473.83]], "cny": [["2023-07-02", 7.2424], ["2023-07-09", 7.2113], ["2023-07-16", 7.1403], ["2023-07-23", 7.1779], ["2023-07-30", 7.1028], ["2023-08-06", 7.1312], ["2023-08-13", 7.1923], ["2023-08-20", 7.2807], ["2023-08-27", 7.289], ["2023-09-03", 7.1401], ["2023-09-10", 7.2324], ["2023-09-17", 7.2739], ["2023-09-24", 7.2975], ["2023-10-01", 7.1636], ["2023-10-08", 7.3005], ["2023-10-15", 7.1681], ["2023-10-22", 7.3154], ["2023-10-30", 7.1587], ["2023-11-06", 7.2985], ["2023-11-13", 7.1818], ["2023-11-20", 7.2097], ["2023-11-27", 7.0819], ["2023-12-04", 7.0618], ["2023-12-11", 7.1266], ["2023-12-18", 7.0705], ["2023-12-25", 7.0833], ["2024-01-01", 7.0686], ["2024-01-08", 7.0925], ["2024-01-15", 7.1006], ["2024-01-22", 7.1071], ["2024-01-29", 7.0866], ["2024-02-05", 7.1126], ["2024-02-12", 7.179], ["2024-02-19", 7.1186], ["2024-02-26", 7.1944], ["2024-03-04", 7.1958], ["2024-03-11", 7.1852], ["2024-03-18", 7.195], ["2024-03-25", 7.2281], ["2024-03-31", 7.2203], ["2024-04-07", 7.2314], ["2024-04-14", 7.2356], ["2024-04-21", 7.2394], ["2024-04-28", 7.2446], ["2024-05-05", 7.2362], ["2024-05-12", 7.2258], ["2024-05-19", 7.2227], ["2024-05-26", 7.2415], ["2024-06-02", 7.241], ["2024-06-09", 7.2468], ["2024-06-16", 7.2543], ["2024-06-23", 7.2592], ["2024-06-30", 7.2658], ["2024-07-07", 7.2678], ["2024-07-14", 7.2494], ["2024-07-21", 7.269], ["2024-07-28", 7.2501], ["2024-08-04", 7.1572], ["2024-08-11", 7.1663], ["2024-08-18", 7.164], ["2024-08-25", 7.124], ["2024-09-01", 7.0921], ["2024-09-08", 7.0879], ["2024-09-15", 7.0927], ["2024-09-22", 7.0509], ["2024-09-29", 7.0103], ["2024-10-06", 7.0175], ["2024-10-13", 7.0652], ["2024-10-20", 7.1008], ["2024-10-28", 7.1201], ["2024-11-04", 7.1217], ["2024-11-11", 7.1782], ["2024-11-18", 7.231], ["2024-11-25", 7.242], ["2024-12-02", 7.2407], ["2024-12-09", 7.2693], ["2024-12-16", 7.2751], ["2024-12-23", 7.2954], ["2024-12-30", 7.2978], ["2025-01-07", 7.3223], ["2025-01-14", 7.3298], ["2025-01-21", 7.3133], ["2025-01-28", 7.2507], ["2025-02-04", 7.195], ["2025-02-11", 7.3045], ["2025-02-18", 7.253], ["2025-02-25", 7.2476], ["2025-03-04", 7.2843], ["2025-03-11", 7.2591], ["2025-03-18", 7.2327], ["2025-03-25", 7.253], ["2025-03-31", 7.2567], ["2025-04-07", 7.3081], ["2025-04-14", 7.3119], ["2025-04-23", 7.286], ["2025-04-30", 7.2706], ["2025-05-07", 7.2252], ["2025-05-14", 7.2057], ["2025-05-21", 7.2019], ["2025-05-28", 7.2037], ["2025-06-04", 7.2037], ["2025-06-11", 7.1928], ["2025-06-18", 7.1888], ["2025-06-25", 7.1764], ["2025-07-02", 7.1649], ["2025-07-09", 7.18], ["2025-07-16", 7.1785], ["2025-07-23", 7.1595], ["2025-07-30", 7.1764], ["2025-08-06", 7.1828], ["2025-08-13", 7.1743], ["2025-08-20", 7.1757], ["2025-08-27", 7.153], ["2025-09-03", 7.1414], ["2025-09-10", 7.1207], ["2025-09-17", 7.1033], ["2025-09-24", 7.1315], ["2025-10-01", 7.119], ["2025-10-08", 7.1185], ["2025-10-15", 7.1262], ["2025-10-22", 7.1257], ["2025-10-30", 7.099], ["2025-11-06", 7.126], ["2025-11-13", 7.1193], ["2025-11-20", 7.1075], ["2025-11-27", 7.0758], ["2025-12-04", 7.0636], ["2025-12-11", 7.064], ["2025-12-18", 7.043], ["2025-12-26", 7.028], ["2026-01-05", 6.9931], ["2026-01-12", 6.9772], ["2026-01-19", 6.9681], ["2026-01-26", 6.9726], ["2026-02-02", 6.951], ["2026-02-09", 6.9388], ["2026-02-16", 6.908], ["2026-02-23", 6.908], ["2026-03-02", 6.8579], ["2026-03-09", 6.8965], ["2026-03-16", 6.8961], ["2026-03-23", 6.8857], ["2026-03-29", 6.9116], ["2026-04-05", 6.8824], ["2026-04-12", 6.8278], ["2026-04-19", 6.817], ["2026-04-26", 6.8359], ["2026-05-03", 6.8275], ["2026-05-10", 6.8005], ["2026-05-17", 6.8092], ["2026-05-24", 6.7945], ["2026-05-31", 6.7662], ["2026-06-07", 6.7655], ["2026-06-14", 6.766], ["2026-06-21", 6.7686], ["2026-06-28", 6.798]]};
+const BDATE="2 июля 2026";
+const SIGCLS="buy";
+document.getElementById('lede').textContent=document.querySelector('details.brief .full').textContent.split('.').slice(0,2).join('.')+'.';
+const sw=document.getElementById('sw');let charts=[];
+function setTheme(t){if(t!=='apple'&&t!=='spacex')t='spacex';
+ document.body.className=t;localStorage.setItem('adv_theme2',t);
+ sw.querySelectorAll('span').forEach(s=>s.classList.toggle('on',s.dataset.t===t));
+ drawCharts();if(t==='spacex'){startStars();if(window.__rsStars)window.__rsStars();}}
+sw.addEventListener('click',e=>{if(e.target.dataset.t)setTheme(e.target.dataset.t)});
+document.getElementById('tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
+ document.getElementById(b.dataset.p).classList.add('on');
+ if(b.dataset.p==='p5')drawCharts();});
+function palette(){return document.body.classList.contains('apple')
+ ?{main:'#0071e3',alt:'#9d4edd',b:'#e08600',d:'#1d7a3a',r:'#d4537e',grid:'rgba(0,0,0,.06)',tick:'#86868b'}
+ :{main:'#ffffff',alt:'#ff3b30',b:'#ffb020',d:'#30ff9e',r:'#ff6b60',grid:'rgba(255,255,255,.07)',tick:'#777'}}
+function drawCharts(){charts.forEach(c=>c.destroy());charts=[];const P=palette();
+ Chart.defaults.color=P.tick;Chart.defaults.font.family=getComputedStyle(document.body).getPropertyValue('--ff');
+ function line(id,data,color){const el=document.getElementById(id);if(!el)return;
+  const ctx=el.getContext('2d');const g=ctx.createLinearGradient(0,0,0,200);g.addColorStop(0,color+'33');g.addColorStop(1,color+'00');
+  charts.push(new Chart(ctx,{type:'line',data:{labels:data.map(r=>r[0]),datasets:[{data:data.map(r=>r[1]),borderColor:color,backgroundColor:g,fill:true,borderWidth:1.8,pointRadius:0,tension:.25}]},
+  options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:P.grid},ticks:{maxTicksLimit:6}},y:{grid:{color:P.grid},ticks:{maxTicksLimit:5}}},interaction:{mode:'index',intersect:false},animation:{duration:900}}}));}
+ line('c1d',S.kzt_1d,P.main);line('c1w',S.kzt_1w,P.main);line('c1m',S.kzt_1m,P.main);line('c2y',S.kzt_2y,P.main);line('call',S.kzt_all,P.alt);
+ line('cbrent',S.brent,P.b);line('cdxy',S.dxy,P.d);line('crub',S.rub,P.r);line('ccny',S.cny,P.alt);}
+let starsOn=false;
+function startStars(){
+ const c=document.getElementById('stars'),x=c.getContext('2d');
+ let W=0,H=0;
+ function rs(){const d=devicePixelRatio||1;W=innerWidth;H=innerHeight;
+  c.width=Math.round(W*d);c.height=Math.round(H*d);
+  c.style.width=W+'px';c.style.height=H+'px';x.setTransform(d,0,0,d,0,0);}
+ window.__rsStars=rs;rs();
+ if(starsOn)return;starsOn=true;
+ addEventListener('resize',rs);
+ /* спрайты: идеально круглая звезда с мягким свечением */
+ function sprite(sz,core,glow){const s=document.createElement('canvas');s.width=s.height=sz;
+  const g=s.getContext('2d'),r=sz/2,gr=g.createRadialGradient(r,r,0,r,r,r);
+  gr.addColorStop(0,'rgba(255,255,255,'+core+')');gr.addColorStop(.25,'rgba(235,240,255,'+(core*.55)+')');
+  gr.addColorStop(.6,'rgba(210,225,255,'+glow+')');gr.addColorStop(1,'rgba(200,220,255,0)');
+  g.fillStyle=gr;g.fillRect(0,0,sz,sz);return s;}
+ const spSmall=sprite(32,1,.10),spBig=sprite(96,1,.16);
+ function cometSprite(col){const s=document.createElement('canvas');s.width=s.height=64;
+  const g=s.getContext('2d'),gr=g.createRadialGradient(32,32,0,32,32,32);
+  gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.2,'rgba('+col+',.95)');
+  gr.addColorStop(.55,'rgba('+col+',.30)');gr.addColorStop(1,'rgba('+col+',0)');
+  g.fillStyle=gr;g.fillRect(0,0,64,64);return s;}
+ const st=Array.from({length:230},()=>({x:Math.random(),y:Math.random(),
+  r:2.5+Math.random()*4.5,s:.25+Math.random()*.75,ph:Math.random()*9,big:Math.random()<.10}));
+ const CMAP={buy:{col:'110,255,190',dy:-.16},sell:{col:'255,110,96',dy:.2},hold:{col:'220,230,255',dy:.03}};
+ const cfg=CMAP[SIGCLS]||CMAP.hold;
+ const spComet=cometSprite(cfg.col);
+ let comet=null,nextComet=performance.now()+7000;
+ function spawnComet(){const fromLeft=Math.random()<.7;
+  comet={x:fromLeft?-.08:1.08,y:.06+Math.random()*.32,
+   vx:(fromLeft?1:-1)*(.0014+Math.random()*.0008),
+   vy:cfg.dy*.0035*(.7+Math.random()*.6),born:performance.now()};}
+ (function loop(t){if(document.body.classList.contains('spacex')){
+  x.clearRect(0,0,W,H);
+  x.globalCompositeOperation='lighter';
+  for(const s of st){
+   const px=s.x*W,py=s.y*H;
+   if(s.big){
+    const a=.45+.55*Math.abs(Math.sin(t/1100*s.s+s.ph));
+    const sz=s.r*3.2*(0.8+.4*a);
+    x.globalAlpha=a;x.drawImage(spBig,px-sz/2,py-sz/2,sz,sz);
+    /* лучики-искры */
+    x.globalAlpha=a*.55;x.strokeStyle='rgba(230,240,255,1)';x.lineWidth=.8;
+    const L=sz*.62;x.beginPath();
+    x.moveTo(px-L,py);x.lineTo(px+L,py);x.moveTo(px,py-L);x.lineTo(px,py+L);x.stroke();
+   }else{
+    const a=.30+.65*Math.abs(Math.sin(t/1500*s.s+s.ph));
+    const sz=s.r*(0.85+.3*a);
+    x.globalAlpha=a;x.drawImage(spSmall,px-sz/2,py-sz/2,sz,sz);
+   }
+  }
+  if(!comet&&t>nextComet)spawnComet();
+  if(comet){
+   comet.x+=comet.vx;comet.y+=comet.vy;
+   const hx=comet.x*W,hy=comet.y*H;
+   const sp=Math.hypot(comet.vx*W,comet.vy*H)||1;
+   const ux=(comet.vx*W)/sp,uy=(comet.vy*H)/sp;
+   const fade=Math.min(1,(t-comet.born)/1200);
+   const TL=Math.min(220,W*.16);
+   /* хвост: сужающийся градиентный шлейф из трёх слоёв */
+   for(const [w0,a0,k] of [[7,.10,1],[3.5,.25,.92],[1.4,.6,.85]]){
+    const g=x.createLinearGradient(hx,hy,hx-ux*TL*k,hy-uy*TL*k);
+    g.addColorStop(0,'rgba('+cfg.col+','+(a0*fade)+')');
+    g.addColorStop(1,'rgba('+cfg.col+',0)');
+    x.globalAlpha=1;x.strokeStyle=g;x.lineWidth=w0;x.lineCap='round';
+    x.beginPath();x.moveTo(hx,hy);
+    x.quadraticCurveTo(hx-ux*TL*k*.5,hy-uy*TL*k*.5-3,hx-ux*TL*k,hy-uy*TL*k-6);x.stroke();
+   }
+   /* искры вдоль хвоста */
+   for(let i=0;i<5;i++){const d=Math.random()*TL*.8,sw=Math.random()*1.4;
+    x.globalAlpha=(1-d/TL)*.5*fade;
+    x.fillStyle='rgba('+cfg.col+',1)';
+    x.beginPath();x.arc(hx-ux*d+(Math.random()-.5)*7,hy-uy*d+(Math.random()-.5)*7,sw,0,7);x.fill();}
+   /* голова */
+   x.globalAlpha=fade;
+   x.drawImage(spComet,hx-16,hy-16,32,32);
+   if(comet.x<-.15||comet.x>1.15||comet.y>1.18||comet.y<-.18){
+    comet=null;nextComet=t+45000+Math.random()*75000;}
+  }
+  x.globalCompositeOperation='source-over';x.globalAlpha=1;
+ }
+ requestAnimationFrame(loop)})(0);}
+document.addEventListener('mousemove',e=>{
+ const x=(e.clientX/innerWidth-.5),y=(e.clientY/innerHeight-.5);
+ document.querySelectorAll('.blob').forEach((b,i)=>{b.style.transform='translate('+x*(14+i*8)+'px,'+y*(10+i*6)+'px)'});});
+
+document.querySelectorAll('.info').forEach(el=>{
+ el.addEventListener('mouseenter',()=>{
+  const tip=el.querySelector('.tip');if(!tip)return;
+  tip.style.left='50%';tip.style.right='auto';tip.style.transform='translateX(-50%)';
+  tip.style.bottom='130%';tip.style.top='auto';
+  const r=tip.getBoundingClientRect();
+  if(r.top<8){tip.style.bottom='auto';tip.style.top='130%';}
+  const r2=tip.getBoundingClientRect();
+  if(r2.left<8){tip.style.left='0';tip.style.transform='none';}
+  if(r2.right>innerWidth-8){tip.style.left='auto';tip.style.right='0';tip.style.transform='none';}
+ });
+});
+document.getElementById('fab').onclick=()=>document.getElementById('chatpop').classList.toggle('open');
+function goChat(){const q=document.getElementById('q').value.trim()||'Дай развёрнутый комментарий по сегодняшней сводке';
+ const ctx='Босс спрашивает по сводке USD/KZT AI Advisor от '+BDATE+' (проект usdkzt-advisor): ';
+ window.open('https://claude.ai/new?q='+encodeURIComponent(ctx+q),'_blank');}
+setTheme(localStorage.getItem('adv_theme2')||'spacex');
+</script></body></html>
