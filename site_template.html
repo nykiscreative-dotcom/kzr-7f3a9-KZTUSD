@@ -1,5 +1,14 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>USD/KZT · Ваш AI-консультант</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="USD/KZT">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -57,6 +66,12 @@ body.spacex #cometlegend{display:block!important}
 main{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:30px clamp(14px,3vw,32px)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--bd);padding-bottom:14px}
 .lbl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+.fresh{display:inline-flex;align-items:center;gap:7px}
+.fdot{width:8px;height:8px;border-radius:50%;background:#666;flex:none}
+.fdot.ok{background:#30d158;box-shadow:0 0 8px rgba(48,209,88,.7);animation:fpulse 2.4s infinite}
+.fdot.warn{background:#ffd60a;box-shadow:0 0 8px rgba(255,214,10,.6)}
+.fdot.old{background:#ff453a;box-shadow:0 0 8px rgba(255,69,58,.6)}
+@keyframes fpulse{0%,100%{opacity:1}50%{opacity:.55}}
 .switch{display:flex;gap:2px;border:1px solid var(--bd);border-radius:30px;padding:4px;cursor:pointer;user-select:none;background:var(--glass)}
 .switch span{font-size:11px;padding:6px 13px;border-radius:20px;color:var(--mut);transition:.3s;letter-spacing:.06em}
 .switch span.on{background:var(--tx);color:var(--bg)}
@@ -157,25 +172,20 @@ canvas{max-height:200px}
 .info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:5px;border-radius:50%;background:var(--kvbd);color:var(--acc);font-size:9px;cursor:help;position:relative;vertical-align:1px}
 .info .tip{visibility:hidden;opacity:0;position:absolute;bottom:130%;left:50%;transform:translateX(-50%) translateY(4px);width:min(280px,74vw);background:var(--tipbg);color:var(--tiptx);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font-size:11.5px;line-height:1.5;font-weight:400;box-shadow:0 12px 40px rgba(0,0,0,.25);z-index:50;transition:.25s;pointer-events:none;text-transform:none;letter-spacing:0}
 .info:hover .tip,.info:focus .tip{visibility:visible;opacity:1;transform:translateX(-50%) translateY(0)}
-/* chat */
-.fab{position:fixed;right:20px;bottom:20px;z-index:100;width:54px;height:54px;border-radius:50%;border:none;background:var(--acc);color:#fff;font-size:21px;cursor:pointer;box-shadow:0 12px 32px rgba(0,0,0,.3);transition:.3s;animation:pulse 3s infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-.fab:hover{transform:scale(1.1)}
-#chatpop{position:fixed;right:20px;bottom:84px;z-index:101;width:min(320px,88vw);background:var(--chatbg);backdrop-filter:blur(20px);border:1px solid var(--bd);border-radius:16px;padding:16px;display:none;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-#chatpop.open{display:block;animation:fade .35s ease}
-#chatpop .t{font-size:13px;font-weight:700;margin-bottom:10px}
-#chatpop input{width:100%;background:transparent;border:1px solid var(--bd);border-radius:10px;padding:11px 12px;color:var(--tx);font-family:var(--ff);font-size:13px;outline:none}
-#chatpop .go{margin-top:10px;width:100%;border:none;border-radius:10px;padding:11px;background:var(--acc);color:#fff;font-weight:700;cursor:pointer;font-family:var(--ff)}
-#chatpop .m{font-size:10.5px;color:var(--mut);margin-top:8px;line-height:1.5}
 .disclaimer{margin-top:36px;color:var(--mut);opacity:.75;font-size:10.5px;line-height:1.6;max-width:880px}
-@media(max-width:760px){.factor{grid-template-columns:1fr 50px}.f-bar{grid-column:1/-1}.j-row{grid-template-columns:1fr}h1{margin-top:22px}}
+@media(max-width:760px){.factor{grid-template-columns:1fr 50px}.f-bar{grid-column:1/-1}.j-row{grid-template-columns:1fr}h1{margin-top:22px}
+.tabs{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;position:sticky;top:0;z-index:20;margin:22px -14px 14px;padding:9px 14px;gap:8px;scrollbar-width:none;background:var(--bg)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;scroll-snap-align:start;white-space:nowrap}
+body.spacex .tabs{gap:1px;border:none;background:var(--bg)}}
 </style></head><body class="spacex">
 <div class="blob b1"></div><div class="blob b2"></div>
 <canvas class="stars" id="stars"></canvas>
 <main>
 <div class="top">
   <span class="lbl">USD/KZT · Advisory System</span>
-  <span class="lbl">__DATE_HUMAN__ · T−__TMINUS__ до налогового дедлайна</span>
+  <span class="lbl">T−__TMINUS__ до налогового дедлайна</span>
+  <span class="lbl fresh"><span class="fdot" id="fdot"></span><span id="ftext">__DATE_HUMAN__</span></span>
   <div class="switch" id="sw"><span data-t="apple">Apple</span><span data-t="spacex" class="on">SpaceX</span></div>
 </div>
 <h1 class="h1s">Босс, <b>миссия: __MISSION__</b><br>фаза: __PHASE__</h1>
@@ -271,18 +281,24 @@ canvas{max-height:200px}
 <div class="disclaimer" style="display:none" id="cometlegend">☄ Комета на небе — вестник сигнала дня: зелёная (вверх) — покупать, красная (вниз) — продавать или аномалия, белая — ждать. Появляется редко, как и хорошие сделки.</div>
 <div class="disclaimer">Вероятностные рекомендации на основе открытых данных (НБК, KASE, Yahoo Finance, ФРС). Преимущество не гарантирует результат; риск остаётся; решение принимает пользователь.</div>
 </main>
-
-<button class="fab" id="fab" aria-label="Спросить консультанта">💬</button>
-<div id="chatpop">
-  <div class="t">Вопрос консультанту</div>
-  <input id="q" placeholder="Например: почему покупать сейчас?" onkeydown="if(event.key==='Enter')goChat()">
-  <button class="go" onclick="goChat()">Спросить Claude →</button>
-  <div class="m">Откроется диалог со мной в Claude — отвечу со свежими данными. Ничего не расходуется, пока Вы не спросите.</div>
-</div>
-
 <script>
 const S=__SERIES__;
 const BDATE="__DATE_HUMAN__";
+const BUILT="__BUILT_ISO__";
+(function(){
+ const el=document.getElementById('ftext'),dot=document.getElementById('fdot');
+ if(!el||!dot)return;
+ const b=new Date(BUILT); if(isNaN(b)){el.textContent='Обновлено: '+BDATE;return;}
+ const hrs=(Date.now()-b.getTime())/36e5;
+ const t=b.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Almaty'});
+ let status,cls;
+ if(hrs<26){status='данные актуальны';cls='ok';}
+ else if(hrs<50){status='обновление вчера';cls='warn';}
+ else{status='данные устарели ('+Math.round(hrs/24)+' дн.)';cls='old';}
+ dot.className='fdot '+cls;
+ el.textContent='Обновлено '+t+' (Астана) · '+status;
+ el.title='Время последней сборки сводки';
+})();
 const SIGCLS="__MT_CLS__";
 document.getElementById('lede').textContent=document.querySelector('details.brief .full').textContent.split('.').slice(0,2).join('.')+'.';
 const sw=document.getElementById('sw');let charts=[];
@@ -295,7 +311,8 @@ document.getElementById('tabs').addEventListener('click',e=>{const b=e.target.cl
  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');
  document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
  document.getElementById(b.dataset.p).classList.add('on');
- if(b.dataset.p==='p5')drawCharts();});
+ if(b.dataset.p==='p5')drawCharts();
+ b.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});});
 function palette(){return document.body.classList.contains('apple')
  ?{main:'#0071e3',alt:'#9d4edd',b:'#e08600',d:'#1d7a3a',r:'#d4537e',grid:'rgba(0,0,0,.06)',tick:'#86868b'}
  :{main:'#ffffff',alt:'#ff3b30',b:'#ffb020',d:'#30ff9e',r:'#ff6b60',grid:'rgba(255,255,255,.07)',tick:'#777'}}
@@ -317,20 +334,25 @@ function startStars(){
  window.__rsStars=rs;rs();
  if(starsOn)return;starsOn=true;
  addEventListener('resize',rs);
- /* спрайты: идеально круглая звезда с мягким свечением */
- function sprite(sz,core,glow){const s=document.createElement('canvas');s.width=s.height=sz;
-  const g=s.getContext('2d'),r=sz/2,gr=g.createRadialGradient(r,r,0,r,r,r);
-  gr.addColorStop(0,'rgba(255,255,255,'+core+')');gr.addColorStop(.25,'rgba(235,240,255,'+(core*.55)+')');
-  gr.addColorStop(.6,'rgba(210,225,255,'+glow+')');gr.addColorStop(1,'rgba(200,220,255,0)');
-  g.fillStyle=gr;g.fillRect(0,0,sz,sz);return s;}
- const spSmall=sprite(32,1,.10),spBig=sprite(96,1,.16);
+ /* спрайт: тонкая 4-лучевая искра (кинематограф) */
+ function sprite(sz,spikeW){const s=document.createElement('canvas');s.width=s.height=sz;
+  const g=s.getContext('2d'),c=sz/2;g.globalCompositeOperation='lighter';
+  let gr=g.createRadialGradient(c,c,0,c,c,sz*.16);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle=gr;g.beginPath();g.arc(c,c,sz*.16,0,7);g.fill();
+  function sp(len,w,ang){g.save();g.translate(c,c);g.rotate(ang);
+   const lg=g.createLinearGradient(0,0,0,-len);lg.addColorStop(0,'rgba(255,255,255,.85)');lg.addColorStop(.45,'rgba(255,255,255,.18)');lg.addColorStop(1,'rgba(255,255,255,0)');
+   g.fillStyle=lg;g.beginPath();g.moveTo(0,0);g.lineTo(-w,-len*.5);g.lineTo(0,-len);g.lineTo(w,-len*.5);g.closePath();g.fill();g.restore();}
+  const L=c*.95,w=sz*spikeW;sp(L,w,0);sp(L,w,Math.PI);sp(L,w,Math.PI/2);sp(L,w,-Math.PI/2);
+  g.fillStyle='rgba(255,255,255,1)';g.beginPath();g.arc(c,c,sz*.028,0,7);g.fill();return s;}
+ const spStar=sprite(96,.02);
  function cometSprite(col){const s=document.createElement('canvas');s.width=s.height=64;
   const g=s.getContext('2d'),gr=g.createRadialGradient(32,32,0,32,32,32);
   gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.2,'rgba('+col+',.95)');
   gr.addColorStop(.55,'rgba('+col+',.30)');gr.addColorStop(1,'rgba('+col+',0)');
   g.fillStyle=gr;g.fillRect(0,0,64,64);return s;}
- const st=Array.from({length:230},()=>({x:Math.random(),y:Math.random(),
-  r:2.5+Math.random()*4.5,s:.25+Math.random()*.75,ph:Math.random()*9,big:Math.random()<.10}));
+ const far=Array.from({length:240},()=>({x:Math.random(),y:Math.random(),r:.3+Math.random()*.8,s:.2+Math.random()*.5,ph:Math.random()*9}));
+ const mid=Array.from({length:80},()=>({x:Math.random(),y:Math.random(),r:.7+Math.random()*1.1,s:.3+Math.random()*.7,ph:Math.random()*9}));
+ const brt=Array.from({length:24},()=>({x:Math.random(),y:Math.random(),r:5+Math.random()*7,s:.3+Math.random()*.6,ph:Math.random()*9}));
  const CMAP={buy:{col:'110,255,190',dy:-.16},sell:{col:'255,110,96',dy:.2},hold:{col:'220,230,255',dy:.03}};
  const cfg=CMAP[SIGCLS]||CMAP.hold;
  const spComet=cometSprite(cfg.col);
@@ -342,22 +364,9 @@ function startStars(){
  (function loop(t){if(document.body.classList.contains('spacex')){
   x.clearRect(0,0,W,H);
   x.globalCompositeOperation='lighter';
-  for(const s of st){
-   const px=s.x*W,py=s.y*H;
-   if(s.big){
-    const a=.45+.55*Math.abs(Math.sin(t/1100*s.s+s.ph));
-    const sz=s.r*3.2*(0.8+.4*a);
-    x.globalAlpha=a;x.drawImage(spBig,px-sz/2,py-sz/2,sz,sz);
-    /* лучики-искры */
-    x.globalAlpha=a*.55;x.strokeStyle='rgba(230,240,255,1)';x.lineWidth=.8;
-    const L=sz*.62;x.beginPath();
-    x.moveTo(px-L,py);x.lineTo(px+L,py);x.moveTo(px,py-L);x.lineTo(px,py+L);x.stroke();
-   }else{
-    const a=.30+.65*Math.abs(Math.sin(t/1500*s.s+s.ph));
-    const sz=s.r*(0.85+.3*a);
-    x.globalAlpha=a;x.drawImage(spSmall,px-sz/2,py-sz/2,sz,sz);
-   }
-  }
+  for(const s of far){const a=.15+.35*Math.abs(Math.sin(t/1700*s.s+s.ph));x.globalAlpha=1;x.fillStyle='rgba(210,225,255,'+a+')';x.beginPath();x.arc(s.x*W,s.y*H,s.r,0,7);x.fill();}
+  for(const s of mid){const a=.3+.55*Math.abs(Math.sin(t/1400*s.s+s.ph));x.fillStyle='rgba(240,246,255,'+a+')';x.beginPath();x.arc(s.x*W,s.y*H,s.r,0,7);x.fill();}
+  for(const s of brt){const a=.45+.55*Math.abs(Math.sin(t/1200*s.s+s.ph));const sz=s.r*5*(.85+.3*a);x.globalAlpha=a;x.drawImage(spStar,s.x*W-sz/2,s.y*H-sz/2,sz,sz);x.globalAlpha=1;}
   if(!comet&&t>nextComet)spawnComet();
   if(comet){
    comet.x+=comet.vx;comet.y+=comet.vy;
@@ -405,9 +414,5 @@ document.querySelectorAll('.info').forEach(el=>{
   if(r2.right>innerWidth-8){tip.style.left='auto';tip.style.right='0';tip.style.transform='none';}
  });
 });
-document.getElementById('fab').onclick=()=>document.getElementById('chatpop').classList.toggle('open');
-function goChat(){const q=document.getElementById('q').value.trim()||'Дай развёрнутый комментарий по сегодняшней сводке';
- const ctx='Босс спрашивает по сводке USD/KZT AI Advisor от '+BDATE+' (проект usdkzt-advisor): ';
- window.open('https://claude.ai/new?q='+encodeURIComponent(ctx+q),'_blank');}
 setTheme(localStorage.getItem('adv_theme2')||'spacex');
 </script></body></html>
