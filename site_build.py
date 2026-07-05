@@ -136,7 +136,8 @@ sma200 = sma(200); dist200 = round(abs(c[-1]/sma200-1)*100, 1) if sma200 else "-
 
 page = open(os.path.join(BASE, "site_template.html"), encoding="utf-8").read()
 subs = {
- "__DATE_HUMAN__": f"{d.day} {RU_M[d.month]} {d.year}", "__UPDATED__": datetime.now().strftime("%H:%M UTC"),
+ "__DATE_HUMAN__": f"{d.day} {RU_M[d.month]} {d.year}", "__UPDATED__": datetime.now().strftime("%d.%m %H:%M UTC"),
+ "__BUILT_ISO__": datetime.now().astimezone().isoformat(),
  "__HEADLINE__": brief["headline"], "__GREETING__": brief["greeting_html"],
  "__OFFICIAL__": str(brief["official"]), "__MARKET__": str(brief["market"]),
  "__PUP__": str(brief["medium_term"]["p_up"]), "__TIP_OFFICIAL__": H.escape(TIPS["official"], quote=True),
@@ -188,8 +189,39 @@ subs.update({
  "__MT_CLS__": brief["medium_term"]["verdict_class"],
 })
 
-for k, v in subs.items(): page = page.replace(k, str(v))
-page = page.replace("</head>", '<meta name="robots" content="noindex,nofollow"></head>', 1)
+# --- Плашка свежести / состояние: свежо / биржа закрыта / СБОЙ ---
+_status = brief.get("status", "fresh")
+_fr = brief.get("data_freshness", {}) or {}
+_od = _fr.get("official_date_h", "-"); _md = _fr.get("market_date_h", "-")
+_gen = _fr.get("generated_at", "")
+_reason = H.escape(_fr.get("reason", ""))
+if _status == "fail":
+    _banner = ('<div class="fbanner fail">&#9888; СБОЙ ЗАГРУЗКИ ДАННЫХ &mdash; сигнал скрыт. '
+               + _reason + '. Последние данные: НБК ' + _od + ', рынок ' + _md
+               + '. Решения по этой сводке не принимать.</div>')
+elif _status == "market_closed":
+    _banner = ('<div class="fbanner warn">&#128993; Биржа закрыта (выходной/праздник). '
+               'Суждение основано на данных последнего торгового дня: НБК ' + _od + ', рынок ' + _md + '.</div>')
+else:
+    _banner = ('<div class="fbanner ok">&#128994; Данные актуальны: НБК ' + _od + ', рынок ' + _md
+               + ((' &middot; сборка ' + _gen) if _gen else '') + '.</div>')
+subs["__FRESH_BANNER__"] = _banner
+subs["__STATE__"] = "state-fail" if _status == "fail" else ("state-closed" if _status == "market_closed" else "")
+if _status == "fail":
+    subs.update({"__MISSION__": "СБОЙ ДАННЫХ", "__PHASE__": "БЛОКИРОВКА",
+                 "__ST_V__": "СБОЙ", "__MT_V__": "СБОЙ", "__ST_P__": "-", "__PUP__": "0", "__INVALID__": "-"})
+
+_FCSS = ("<style>.fbanner{margin:12px 0;padding:12px 16px;border-radius:12px;font-weight:600;"
+         "font-size:14px;line-height:1.45}.fbanner.ok{background:rgba(48,255,158,.10);color:#30ff9e;"
+         "border:1px solid rgba(48,255,158,.35)}.fbanner.warn{background:rgba(255,176,32,.12);"
+         "color:#ffb020;border:1px solid rgba(255,176,32,.42)}.fbanner.fail{background:rgba(255,59,48,.15);"
+         "color:#ff6a60;border:1px solid rgba(255,59,48,.6)}body.apple .fbanner.ok{color:#1d7a3a}"
+         "body.apple .fbanner.warn{color:#9a5600}body.apple .fbanner.fail{color:#c0271b}"
+         "main.state-fail .duo,main.state-fail .gaugerow .ring{filter:grayscale(1);opacity:.4}</style>")
+
+for k, v in subs.items():
+    page = page.replace(k, str(v))
+page = page.replace("</head>", _FCSS + '<meta name="robots" content="noindex,nofollow"></head>', 1)
 
 os.makedirs(os.path.join(BASE, "docs"), exist_ok=True)
 with open(os.path.join(BASE, "docs", "index.html"), "w", encoding="utf-8") as f:
