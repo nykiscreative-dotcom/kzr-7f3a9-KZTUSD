@@ -1,0 +1,11 @@
+{
+ "brent_oil": 0.2338,
+ "rate_differential_nbk_fed": 0.1818,
+ "tax_calendar_kz": 0.1818,
+ "usdrub": 0.1169,
+ "dxy_fed_policy": 0.0779,
+ "technicals_momentum": 0.0779,
+ "seasonality": 0.026,
+ "nbk_interventions_natfund": 0.0649,
+ "news_geopolitics": 0.039
+}
