@@ -54,8 +54,8 @@ def verify_and_learn(price_by_date):
                 px = _nearest(price_by_date, dates_sorted, target_date)
                 if px: r[field] = round((px / base - 1) * 100, 2)
         # вердикт после 7 дней
-        if r.get("result_7d") and not r.get("outcome"):
-            res = float(r["result_7d"])
+        if r.get("result_3d") and not r.get("outcome"):
+            res = float(r["result_3d"])
             sig = r["signal"]
             ok = (("BUY" in sig and res > 0.3) or ("SELL" in sig and res < -0.3) or
                   (sig in ("HOLD", "NO_TRADE") and abs(res) < 1.0))
