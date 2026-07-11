@@ -1,11 +1,11 @@
 {
- "brent_oil": 0.2496,
- "rate_differential_nbk_fed": 0.1774,
- "tax_calendar_kz": 0.2524,
- "usdrub": 0.0874,
- "dxy_fed_policy": 0.0333,
- "technicals_momentum": 0.0333,
- "seasonality": 0.0223,
- "nbk_interventions_natfund": 0.0901,
- "news_geopolitics": 0.0541
+ "brent_oil": 0.252,
+ "rate_differential_nbk_fed": 0.1728,
+ "tax_calendar_kz": 0.2771,
+ "usdrub": 0.074,
+ "dxy_fed_policy": 0.022,
+ "technicals_momentum": 0.022,
+ "seasonality": 0.022,
+ "nbk_interventions_natfund": 0.0989,
+ "news_geopolitics": 0.0594
 }
