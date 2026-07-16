@@ -79,8 +79,10 @@ def verify_and_learn(price_by_date):
                 pass
     _write(rows)
     if changed:
+        _tot = sum(weights.values()) or 1.0
+        weights = {k: round(v / _tot, 4) for k, v in weights.items()}
         save_weights(weights)
-        notes.append("Веса нормированы и сохранены.")
+        notes.append("Веса ре-нормированы к сумме 1 и сохранены.")
     return "\n".join(notes) if notes else "Новых проверок нет (рекомендации ещё в пределах горизонта)."
 
 def _nearest(price_by_date, dates_sorted, target):
