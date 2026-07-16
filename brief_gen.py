@@ -36,6 +36,19 @@ def run():
     S = sig["score"]; price = sig["price"]
     v, emo, cls = VERDICT[sig["signal"]]
 
+    # D1: рынок = живой внутридневной курс (интрадей) + метаданные источник/время/тип
+    live_market = price; market_src = "daily_close"; market_ts = ""
+    try:
+        import csv as _csv
+        _ip = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "usdkzt_intraday.csv")
+        with open(_ip, encoding="utf-8") as _f:
+            _rows = list(_csv.reader(_f))[1:]
+        if _rows:
+            live_market = round(float(_rows[-1][1]), 2)
+            market_ts = _rows[-1][0]; market_src = "intraday"
+    except Exception as _e:
+        print("intraday market read fail:", _e)
+
     # краткосрочный сигнал: техника+аномалии, налоговая неделя тянет вниз
     st_up = max(20, min(80, 50 + round(S*10) - (12 if ctx["tax_week"] else 0)))
     stv, stemo, stcls = ("ПОКУПАТЬ", "🟢", "buy") if st_up >= 58 else (("ПРОДАВАТЬ", "🔴", "sell") if st_up <= 42 else ("ЖДАТЬ", "🟡", "hold"))
@@ -56,7 +69,7 @@ def run():
                 f"Вероятностная рекомендация: риск остаётся, решение принимаете Вы, Босс.")
 
     brief = {
-     "date": today.isoformat(), "official": official, "market": price,
+     "date": today.isoformat(), "official": official, "market": live_market, "market_source": market_src, "market_time": market_ts, "market_type": "рыночный (интрадей)",
      "headline": f"{emo} {v}: вероятность роста {sig['prob_up_pct']}% на 2-6 недель",
      "greeting_html": greeting,
      "short_term": {"verdict": stv, "emoji": stemo, "verdict_class": stcls,
