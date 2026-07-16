@@ -49,6 +49,13 @@ def run():
     except Exception as _e:
         print("intraday market read fail:", _e)
 
+    # D6: банковский спред — реальные курсы транзакций Босса вокруг mid-курса.
+    # Рекомендации движка считаются на mid, но фактически Босс покупает дороже, продаёт дешевле.
+    SPREAD_KZT = 4.0  # полный спред обменника, ₸; настраивается Боссом
+    _half = SPREAD_KZT / 2.0
+    buy_usd_rate = round(live_market + _half, 2)   # Босс ПОКУПАЕТ $ (банк продаёт дороже)
+    sell_usd_rate = round(live_market - _half, 2)  # Босс ПРОДАЁТ $ (банк покупает дешевле)
+
     # краткосрочный сигнал: техника+аномалии, налоговая неделя тянет вниз
     st_up = max(20, min(80, 50 + round(S*10) - (12 if ctx["tax_week"] else 0)))
     stv, stemo, stcls = ("ПОКУПАТЬ", "🟢", "buy") if st_up >= 58 else (("ПРОДАВАТЬ", "🔴", "sell") if st_up <= 42 else ("ЖДАТЬ", "🟡", "hold"))
@@ -70,6 +77,8 @@ def run():
 
     brief = {
      "date": today.isoformat(), "official": official, "market": live_market, "market_source": market_src, "market_time": market_ts, "market_type": "рыночный (интрадей)",
+     "spread": {"mid": live_market, "buy_usd": buy_usd_rate, "sell_usd": sell_usd_rate, "spread_kzt": SPREAD_KZT,
+        "note": "buy_usd — курс, по которому Вы покупаете доллары; sell_usd — по которому продаёте. Рекомендации считаются на mid; реальная стоимость сделки включает спред. Значение настраивается Боссом."},
      "headline": f"{emo} {v}: вероятность роста {sig['prob_up_pct']}% на 2-6 недель",
      "greeting_html": greeting,
      "short_term": {"verdict": stv, "emoji": stemo, "verdict_class": stcls,
