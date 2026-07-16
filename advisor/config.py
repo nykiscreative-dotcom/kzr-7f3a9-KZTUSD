@@ -7,6 +7,32 @@ BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 WEIGHTS_FILE = os.path.join(DATA_DIR, "factor_weights.json")
+PROPOSALS_FILE = os.path.join(DATA_DIR, "weights_proposals.json")
+
+
+def _env_flag(name, default=False):
+    """Флаг из окружения с fail-safe в False.
+
+    Любое значение, кроме явно распознанного «включено», трактуется как
+    выключено — в том числе опечатка и пустая строка. Флаг управляет записью
+    в production-веса, поэтому неоднозначность обязана падать в безопасную
+    сторону, а не в «наверное, включить».
+    """
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    if raw.strip().lower() in ("1", "true", "yes", "on"):
+        return True
+    return False
+
+
+# Автоматическое применение весов самообучением. Заморожено (аудит 01 v4, D15):
+# production-веса менялись каждый прогон по единичному результату, без ворот,
+# shadow-режима, утверждения и истории версий. За 10 дней technicals_momentum
+# ушёл на -78% от дефолта и дважды опускался ниже объявленной нижней границы.
+# Включение возможно только после governance-процесса (спека 08).
+AUTO_APPLY_WEIGHTS = _env_flag("AUTO_APPLY_WEIGHTS", False)
+
 DEFAULT_WEIGHTS = {
     "brent_oil": 0.22, "rate_differential_nbk_fed": 0.18, "tax_calendar_kz": 0.14,
     "usdrub": 0.13, "dxy_fed_policy": 0.10, "technicals_momentum": 0.10,
