@@ -264,5 +264,148 @@
    "out_of_bounds": {},
    "observations_count": 4
   }
+ },
+ {
+  "proposal_id": "57472265496f1ed4",
+  "timestamp": "2026-07-20T12:26:55",
+  "status": "PROPOSED",
+  "source_weights_sha256": "8e39b8cd4c298aefca7fdab1f239c75c3e85457a745bc4aaeaeb2f5ce7b6cc6c",
+  "source_weights": {
+   "brent_oil": 0.2393,
+   "rate_differential_nbk_fed": 0.1688,
+   "tax_calendar_kz": 0.2465,
+   "usdrub": 0.081,
+   "dxy_fed_policy": 0.0508,
+   "technicals_momentum": 0.0222,
+   "seasonality": 0.0508,
+   "nbk_interventions_natfund": 0.0879,
+   "news_geopolitics": 0.0528
+  },
+  "proposed_weights": {
+   "brent_oil": 0.2765,
+   "rate_differential_nbk_fed": 0.1587,
+   "tax_calendar_kz": 0.2628,
+   "usdrub": 0.065,
+   "dxy_fed_policy": 0.0328,
+   "technicals_momentum": 0.0213,
+   "seasonality": 0.0328,
+   "nbk_interventions_natfund": 0.0937,
+   "news_geopolitics": 0.0563
+  },
+  "changes": {
+   "brent_oil": {
+    "from": 0.2393,
+    "to": 0.2765
+   },
+   "rate_differential_nbk_fed": {
+    "from": 0.1688,
+    "to": 0.1587
+   },
+   "tax_calendar_kz": {
+    "from": 0.2465,
+    "to": 0.2628
+   },
+   "usdrub": {
+    "from": 0.081,
+    "to": 0.065
+   },
+   "dxy_fed_policy": {
+    "from": 0.0508,
+    "to": 0.0328
+   },
+   "technicals_momentum": {
+    "from": 0.0222,
+    "to": 0.0213
+   },
+   "seasonality": {
+    "from": 0.0508,
+    "to": 0.0328
+   },
+   "nbk_interventions_natfund": {
+    "from": 0.0879,
+    "to": 0.0937
+   },
+   "news_geopolitics": {
+    "from": 0.0528,
+    "to": 0.0563
+   }
+  },
+  "reason": "Коррекция по факторным оценкам подтверждённых рекомендаций (шаг ±0.02 при |factor_score| >= 0.5, 6 наблюдений).",
+  "observations": [
+   {
+    "date": "2026-07-17",
+    "signal": "HOLD",
+    "factor": "brent_oil",
+    "factor_score": -0.98,
+    "delta": 0.02,
+    "result_pct": -0.46,
+    "result_field": "result_3d",
+    "horizon_days": 3
+   },
+   {
+    "date": "2026-07-17",
+    "signal": "HOLD",
+    "factor": "rate_differential_nbk_fed",
+    "factor_score": 1.0,
+    "delta": -0.02,
+    "result_pct": -0.46,
+    "result_field": "result_3d",
+    "horizon_days": 3
+   },
+   {
+    "date": "2026-07-17",
+    "signal": "HOLD",
+    "factor": "usdrub",
+    "factor_score": 1.48,
+    "delta": -0.02,
+    "result_pct": -0.46,
+    "result_field": "result_3d",
+    "horizon_days": 3
+   },
+   {
+    "date": "2026-07-17",
+    "signal": "HOLD",
+    "factor": "dxy_fed_policy",
+    "factor_score": 0.51,
+    "delta": -0.02,
+    "result_pct": -0.46,
+    "result_field": "result_3d",
+    "horizon_days": 3
+   },
+   {
+    "date": "2026-07-17",
+    "signal": "HOLD",
+    "factor": "technicals_momentum",
+    "factor_score": 1.02,
+    "delta": -0.02,
+    "result_pct": -0.46,
+    "result_field": "result_3d",
+    "horizon_days": 3
+   },
+   {
+    "date": "2026-07-17",
+    "signal": "HOLD",
+    "factor": "seasonality",
+    "factor_score": 1.94,
+    "delta": -0.02,
+    "result_pct": -0.46,
+    "result_field": "result_3d",
+    "horizon_days": 3
+   }
+  ],
+  "observation_dates": [
+   "2026-07-17"
+  ],
+  "horizon_days": [
+   3
+  ],
+  "metrics": {
+   "sum": 0.9999,
+   "sum_deviation_from_1": -0.0001,
+   "min_weight": 0.0213,
+   "max_weight": 0.2765,
+   "out_of_bounds": {},
+   "observations_count": 6
+  }
  }
 ]
